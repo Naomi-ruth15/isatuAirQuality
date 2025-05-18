@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LATEST STATION DATA</title>
+  <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/justgage@1.4.0/justgage.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div class="min-h-screen bg-gray-100 p-6">
+    <div class="flex flex-col md:flex-row gap-4 justify-center items-start mb-6">
+      <div class="bg-white shadow-lg rounded-xl p-4">
+        <div class="mb-4">
+          <label for="stationSelect" class="text-xl font-semibold text-gray-800 block mb-2">Select Station:</label>
+          <select id="stationSelect" class="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">--SELECT STATION--</option>
+          </select>
+          <p id="lastUpdated" class="text-sm text-gray-500 mt-2"></p>
+        </div>
+      </div>
+      <div class="bg-white shadow-lg rounded-xl p-4 w-full md:w-2/3">
+        <h2 class="text-xl font-bold mb-4">Weighted Data & AQI</h2>
+        <div id="weightedContainer" class="grid grid-cols-1"></div>
+      </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
+      <div class="bg-white shadow-lg rounded-lg p-4 flex flex-col items-center">
+        <div id="tvocGauge" style="height: 160px;"></div>
+        <p class="mt-2 text-gray-600 font-semibold">TVOC</p>
+        <p id="tvocStatus" class="text-gray-700 font-medium">Status</p>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-4 flex flex-col items-center">
+        <div id="eCO2Gauge" style="height: 160px;"></div>
+        <p class="mt-2 text-gray-600 font-semibold">eCO2</p>
+        <p id="eCO2Status" class="text-gray-700 font-medium">Status</p>      
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-4 flex flex-col items-center">
+        <div id="temperatureGauge" style="height: 160px;"></div>
+        <p class="mt-2 text-gray-600 font-semibold">Temperature</p>
+        <p id="temperatureStatus" class="text-gray-700 font-medium">Status</p>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-4 flex flex-col items-center">
+        <div id="humidityGauge" style="height: 160px;"></div>
+        <p class="mt-2 text-gray-600 font-semibold">Humidity</p>
+        <p id="humidityStatus" class="text-gray-700 font-medium">Status</p>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-4 flex flex-col items-center">
+        <div id="dustGauge" style="height: 160px;"></div>
+        <p class="mt-2 text-gray-600 font-semibold">Dust</p>
+        <p id="dustDensityStatus" class="text-gray-700 font-medium">Status</p>
+      </div>
+    </div>
+    
+    <div id="dataContainer" class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto mb-6"></div>
+  </div>
+
+  <script>
+    let gauges = {};
+    const weights = { tvoc: 0.2, eCO2: 0.2, humidity: 0.15, temperature: 0.15, dustDensity: 0.3 };
+    const maxValues = { tvoc: 3000, eCO2: 3000, humidity: 100, temperature: 50, dustDensity: 200 };
+
+    const thresholds = {
+      tvoc: [250, 500, 1000, 2000],
+      eCO2: [400, 800, 1200, 2000],
+      temperature: [18, 24, 30, 36],
+      humidity: [30, 50, 70, 85],
+      dustDensity: [35, 70, 110, 160]
+    };
+
+    function initGauges() {
+      gauges.tvoc = new JustGage({ id: "tvocGauge", value: 0, min: 0, max: 3000 });
+      gauges.eCO2 = new JustGage({ id: "eCO2Gauge", value: 0, min: 0, max: 3000 });
+      gauges.temperature = new JustGage({ id: "temperatureGauge", value: 0, min: 0, max: 50 });
+      gauges.humidity = new JustGage({ id: "humidityGauge", value: 0, min: 0, max: 100 });
+      gauges.dust = new JustGage({ id: "dustGauge", value: 0, min: 0, max: 200 });
+    }
+
+    function getLevel(val, th) {
+      if (val <= th[0]) return "Excellent";
+      if (val <= th[1]) return "Good";
+      if (val <= th[2]) return "Moderate";
+      if (val <= th[3]) return "Poor";
+      return "Unhealthy";
+    }
+
+    function updateStatus(data) {
+      for (const key in thresholds) {
+        if (data[key] !== undefined) {
+          const level = getLevel(data[key], thresholds[key]);
+          const statusEl = document.getElementById(`${key}Status`);
+          if (statusEl) {
+            statusEl.textContent = level; // Simplified status output
+          }
+        }
+      }
+    }
+
+    function updateValues(data) {
+      const { tvoc, eCO2, temperature, humidity, dustDensity } = data;
+      if (tvoc !== undefined) gauges.tvoc.refresh(tvoc);
+      if (eCO2 !== undefined) gauges.eCO2.refresh(eCO2);
+      if (temperature !== undefined) gauges.temperature.refresh(temperature);
+      if (humidity !== undefined) gauges.humidity.refresh(humidity);
+      if (dustDensity !== undefined) gauges.dust.refresh(dustDensity);
+    }
+
+    function computedNormalizedWeightedValues(data, weights, maxValues) {
+      const weightedData = {};
+      for (const [key, value] of Object.entries(data)) {
+        if (weights[key] !== undefined && maxValues[key] !== undefined) {
+          const normalized = Math.min(value / maxValues[key], 1);
+          weightedData[key] = { weightedValue: normalized * weights[key] };
+        }
+      }
+      return weightedData;
+    }
+
+    function computeCompositeScore(weightedData) {
+      return Object.values(weightedData).reduce((sum, item) => sum + item.weightedValue, 0) * 100;
+    }
+
+    function displayTotalScore(score) {
+      const weightedContainer = document.getElementById('weightedContainer');
+      weightedContainer.innerHTML = '';
+      const scoreDiv = document.createElement('div');
+      scoreDiv.className = 'bg-white shadow p-4 rounded font-semibold text-center';
+      scoreDiv.innerHTML = `<strong>Total Score:</strong> ${score.toFixed(2)}`;
+      weightedContainer.appendChild(scoreDiv);
+    }
+
+    function fetchLatestData() {
+      fetch('http://127.0.0.1:5000/latest')
+        .then(res => res.json())
+        .then(data => {
+          if (!data || Object.keys(data).length === 0) return;
+          document.getElementById('dataContainer').innerHTML = '';
+          document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
+
+          for (const [key, value] of Object.entries(data)) {
+            if (key === 'transID') continue;
+            const div = document.createElement('div');
+            div.className = 'bg-white shadow p-4 rounded text-sm';
+            div.innerHTML = `<strong>${key}</strong><br>${value}`;
+            document.getElementById('dataContainer').appendChild(div);
+          }
+
+          const weightedData = computedNormalizedWeightedValues(data, weights, maxValues);
+          const totalScore = computeCompositeScore(weightedData);
+          displayTotalScore(totalScore);
+          updateValues(data);
+          updateStatus(data);
+        });
+    }
+
+    document.getElementById('stationSelect').addEventListener('change', function () {
+      const id = this.value;
+      if (!id) return;
+
+      fetch(`http://127.0.0.1:5000/stations/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data || data.length === 0) return;
+          const latest = data[data.length - 1];
+
+          document.getElementById('dataContainer').innerHTML = '';
+          document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
+
+          for (const [key, value] of Object.entries(latest)) {
+            if (key === 'transID') continue;
+            const div = document.createElement('div');
+            div.className = 'bg-white shadow p-4 rounded text-sm';
+            div.innerHTML = `<strong>${key}</strong><br>${value}`;
+            document.getElementById('dataContainer').appendChild(div);
+          }
+
+          const weightedData = computedNormalizedWeightedValues(latest, weights, maxValues);
+          const totalScore = computeCompositeScore(weightedData);
+          displayTotalScore(totalScore);
+          updateValues(latest);
+          updateStatus(latest);
+        });
+    });
+
+    fetch('http://127.0.0.1:5000/stations')
+      .then(res => res.json())
+      .then(stations => {
+        const select = document.getElementById('stationSelect');
+        stations.forEach(station => {
+          const opt = document.createElement('option');
+          opt.value = station.stationID;
+          opt.textContent = station.stationID;
+          select.appendChild(opt);
+        });
+      });
+
+    window.onload = () => {
+      initGauges();
+      fetchLatestData();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dust Density</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <div class="container mx-auto mt-10 px-4">
+    <h1 class="text-2xl font-bold mb-6">Dust Density Bar Graph by Station</h1>
+    <canvas id="dustChart" class="bg-white p-4 rounded-lg shadow"></canvas>
+  </div>
+
+  <script>
+    fetch('http://127.0.0.1:5000/parameter/dust')
+      .then(response => response.json())
+      .then(data => {
+        const labels = [];
+        const dustValues = [];
+        const tooltips = [];
+
+        const seen = new Set();
+        data.forEach(item => {
+          if (!seen.has(item.stationID)) {
+            seen.add(item.stationID);
+            labels.push(item.stationID);
+            dustValues.push(item.dustDensity);
+            tooltips.push(item.date_time);
+          }
+        });
+
+        const ctx = document.getElementById('dustChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Dust Density (mg/m³)',
+              data: dustValues,
+              backgroundColor: 'rgba(54, 162, 235, 0.6)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const index = context.dataIndex;
+                    return `Dust: ${context.raw} mg/m³, Time: ${tooltips[index]}`;
+                  }
+                }
+              },
+              legend: {
+                display: false
+              },
+              title: {
+                display: true,
+                text: 'Dust Density per Station'
+              }
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: 'Station ID'
+                }
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Dust Density (mg/m³)'
+                }
+              }
+            }
+          }
+        });
+      })
+      .catch(error => console.error('Error fetching Dust Density data:', error));
+  </script>
+</body>
+</html>

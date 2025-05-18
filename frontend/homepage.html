@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+    </style>
+</head>
+
+
+<body class="bg-gradient-to-br from-sky-100 to-blue-200">
+
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm py-4">
+        <nav class="max-w-7xl mx-auto flex justify-center gap-8 px-8 text-lg font-medium">
+            <a href="#" class="text-blue-600 hover:text-blue-800 transition">Home</a>
+            <a href="dashboard.html" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
+            <a href="mission.html" class="text-gray-700 hover:text-blue-600 transition">Mission</a>
+            <a href="team.html" class="text-gray-700 hover:text-blue-600 transition">Team</a>
+            <a href="partner.html" class="text-gray-700 hover:text-blue-600 transition">Partner SUC</a>
+            <a href="contact.html" class="text-gray-700 hover:text-blue-600 transition">Contact</a>
+        </nav>
+    </header>
+
+
+    <!-- Hero Banner -->
+    <section class="relative w-full h-[480px] md:h-[520px] overflow-hidden">
+        <img src="isatu2.jpg" alt="Hero" class="absolute w-full h-full object-cover opacity-70" />
+        <div class="absolute inset-0 flex justify-between items-center px-6 text-white text-5xl font-light">
+            <button class="hover:scale-110 transition-transform">&lt;</button>
+            <button class="hover:scale-110 transition-transform">&gt;</button>
+        </div>
+    </section>
+
+
+    <!-- Main Content Layout -->
+    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 lg:grid-cols-4 gap-10">
+
+
+        <!-- Sidebar -->
+        <aside class="lg:col-span-1 bg-white rounded-2xl shadow-xl p-6 space-y-4 h-fit sticky top-20">
+            <h2 class="text-xl font-semibold text-blue-700 mb-4">Explore Sections</h2>
+            <button onclick="showContent('Parameters')"
+                class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition">📊 Parameters</button>
+            <button onclick="showContent('Framework')"
+                class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition">🏗️ Framework</button>
+            <button onclick="showContent('Monitoring')"
+                class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition">📈 Monitoring Index</button>
+            <button onclick="showContent('Research')"
+                class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition">🤝 Research
+                Partnership</button>
+        </aside>
+
+
+        <!-- Content Area -->
+        <main class="lg:col-span-3 space-y-6">
+            <section id="dynamic-section"
+                class="bg-white rounded-3xl shadow-xl p-10 transition-all duration-300 ease-in-out">
+                <h2 id="content-title" class="text-4xl font-semibold text-blue-700 mb-4">Parameters</h2>
+                <p id="content-text" class="text-gray-700 text-lg leading-relaxed">
+                    To identify critical parameters in modelling indoor environment quality including but not limited to
+                    CO2, temperature, relative humidity, SO2, NOx and Particulate Matter.
+                </p>
+                <div id="image-container" class="mt-8 flex justify-center">
+                    <img src="isatu1.jpg" alt="Parameters Image" class="rounded-xl shadow-md max-w-full w-[420px]" />
+                </div>
+            </section>
+        </main>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="bg-blue-700 text-white text-center py-6 text-sm mt-10">
+        ambiance@g.batstate-u.edu.ph | Alangilan, Batangas City | © 2025
+    </footer>
+
+
+    <!-- Script -->
+    <script>
+        const contents = {
+            Parameters: {
+                title: "Parameters",
+                text: "To identify critical parameters in modelling indoor environment quality including but not limited to CO2, temperature, relative humidity, SO2, NOx and Particulate Matter.",
+                image: "img/parameters.png",
+                color: "bg-white"
+            },
+            Framework: {
+                title: "Framework",
+                text: "Integrating results and green building codes to develop a comprehensive framework that will cover both the future and already built buildings.",
+                image: "img/framework.png",
+                color: "bg-green-50"
+            },
+            Monitoring: {
+                title: "Monitoring Index",
+                text: "To establish a monitoring index and AI-enhanced support tool for improving the IEQ. It will also incorporate data from deployed sensors and end-users’ feedback.",
+                image: "img/monitoring.png",
+                color: "bg-yellow-50"
+            },
+            Research: {
+                title: "Research Partnership",
+                text: "Conduct iterative consultation and coordination to establish research partnerships with SUCs for the development of monitoring database and indexing, to be implemented under the UNSD goals.",
+                image: "img/research.png",
+                color: "bg-indigo-50"
+            }
+        };
+
+
+        function showContent(key) {
+            const section = document.getElementById("dynamic-section");
+            section.className = rounded-3xl shadow-xl p-10 transition-all duration-300 ease-in-out ${contents[key].color};
+            document.getElementById("content-title").innerText = contents[key].title;
+            document.getElementById("content-text").innerText = contents[key].text;
+            document.getElementById("image-container").innerHTML =
+                <img src="${contents[key].image}" alt="${contents[key].title} Image" class="rounded-xl shadow-md max-w-full w-[420px]" />;
+        }
+    </script>
+
+
+</body>
+
+
+</html>

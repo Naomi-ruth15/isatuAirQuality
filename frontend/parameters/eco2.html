@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>eCO2 Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <div class="container mx-auto mt-10 px-4">
+    <h1 class="text-2xl font-bold mb-6">eCO2 Viewer</h1>
+
+    <!-- Station and Date Select -->
+    <div class="mb-6 flex flex-col md:flex-row gap-4">
+      <div>
+        <label for="stationSelect" class="block mb-1 text-lg font-medium">Select Station:</label>
+        <select id="stationSelect" class="p-2 border rounded bg-white shadow w-full">
+          <option value="">-- Select a station --</option>
+        </select>
+      </div>
+      <div>
+        <label for="dateSelect" class="block mb-1 text-lg font-medium">Select Date:</label>
+        <select id="dateSelect" class="p-2 border rounded shadow w-full">
+          <option value="">-- Select a date --</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- From and To Dropdowns -->
+    <div class="mb-6 flex flex-col md:flex-row gap-4">
+      <div>
+        <label for="fromDateSelect" class="block mb-1 text-lg font-medium">From:</label>
+        <select id="fromDateSelect" class="p-2 border rounded shadow w-full">
+          <option value="">-- From Date --</option>
+        </select>
+      </div>
+      <div>
+        <label for="toDateSelect" class="block mb-1 text-lg font-medium">To:</label>
+        <select id="toDateSelect" class="p-2 border rounded shadow w-full">
+          <option value="">-- To Date --</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Line Graph -->
+    <div class="mb-12">
+      <canvas id="lineChart" class="bg-white p-4 rounded-lg shadow w-full h-[400px]"></canvas>
+    </div>
+
+    <!-- Bar Graph -->
+    <h2 class="text-xl font-semibold mb-4">Latest eCO2 Values per Station</h2>
+    <canvas id="eco2Chart" class="bg-white p-4 rounded-lg shadow w-full h-[400px]"></canvas>
+  </div>
+
+  <script>
+    let lineChartInstance;
+
+    async function populateStations() {
+      const res = await fetch('http://127.0.0.1:5000/stations');
+      const stations = await res.json();
+
+      const select = document.getElementById('stationSelect');
+      stations.forEach(station => {
+        const opt = document.createElement('option');
+        opt.value = station.stationID;
+        opt.textContent = station.stationID;
+        select.appendChild(opt);
+      });
+    }
+
+    async function populateDates(stationID) {
+      if (!stationID) return;
+
+      const res = await fetch(`http://127.0.0.1:5000/dates/${stationID}`);
+      const dates = await res.json();
+
+      const dateSelect = document.getElementById('dateSelect');
+      const fromSelect = document.getElementById('fromDateSelect');
+      const toSelect = document.getElementById('toDateSelect');
+
+      dateSelect.innerHTML = '<option value="">-- Select a date --</option>';
+      fromSelect.innerHTML = '<option value="">-- From Date --</option>';
+      toSelect.innerHTML = '<option value="">-- To Date --</option>';
+
+      dates.forEach(date => {
+        [dateSelect, fromSelect, toSelect].forEach(select => {
+          const opt = document.createElement('option');
+          opt.value = date;
+          opt.textContent = date;
+          select.appendChild(opt.cloneNode(true));
+        });
+      });
+    }
+
+    async function loadLineChart(stationID, date) {
+      if (!stationID || !date) return;
+
+      const res = await fetch(`http://127.0.0.1:5000/parameter/eco2/${stationID}/${date}`);
+      const data = await res.json();
+
+      const labels = data.map(entry => entry.date_time);
+      const values = data.map(entry => entry.eCO2);
+
+      updateLineChart(labels, values, stationID, date);
+    }
+
+    async function loadRangeLineChart(stationID, fromDate, toDate) {
+      if (!stationID || !fromDate || !toDate) return;
+
+      const res = await fetch(`http://127.0.0.1:5000/parameter/eco2/${stationID}/${fromDate}/${toDate}`);
+      const data = await res.json();
+
+      let labels = data.map(entry => entry[0]); //date_time
+      let values = data.map(entry => entry[1]); //eCO2
+
+      console.log("Fetched data:", data);
+      console.log("Labels: ", labels);
+      console.log("Values:", values);
+
+      updateLineChart(labels, values, stationID, `${fromDate} → ${toDate}`);
+    }
+
+    function updateLineChart(labels, data, stationID, dateLabel) {
+      const ctx = document.getElementById('lineChart').getContext('2d');
+
+      if (lineChartInstance) {
+        lineChartInstance.destroy();
+      }
+
+      lineChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: `eCO2 for ${stationID} (${dateLabel})`,
+            data: data,
+            fill: false,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.4)',
+            tension: 0.2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: true },
+            title: {
+              display: true,
+              text: `eCO2 Over Time - ${stationID} (${dateLabel})`
+            }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Time' }},
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'eCO2 (ppm)' }
+            }
+          }
+        }
+      });
+    }
+
+    // Load bar graph for latest data
+    fetch('http://127.0.0.1:5000/parameter/eco2')
+      .then(response => response.json())
+      .then(data => {
+        const labels = [];
+        const eco2Values = [];
+        const tooltips = [];
+        const seen = new Set();
+
+        data.forEach(item => {
+          if (!seen.has(item.stationID)) {
+            seen.add(item.stationID);
+            labels.push(item.stationID);
+            eco2Values.push(item.eCO2);
+            tooltips.push(item.date_time);
+          }
+        });
+
+        const ctx = document.getElementById('eco2Chart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'eCO2 (ppm)',
+              data: eco2Values,
+              backgroundColor: 'rgba(255, 99, 132, 0.6)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const index = context.dataIndex;
+                    return `eCO2: ${context.raw}, Time: ${tooltips[index]}`;
+                  }
+                }
+              },
+              legend: { display: false },
+              title: { display: true, text: 'Latest eCO2 Values per Station' }
+            },
+            scales: {
+              x: { title: { display: true, text: 'Station ID' }},
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: 'eCO2 (ppm)' }
+              }
+            }
+          }
+        });
+      });
+
+    // Event Listeners
+    document.getElementById('stationSelect').addEventListener('change', () => {
+      const stationID = document.getElementById('stationSelect').value;
+      populateDates(stationID);
+    });
+
+    document.getElementById('dateSelect').addEventListener('change', () => {
+      const stationID = document.getElementById('stationSelect').value;
+      const date = document.getElementById('dateSelect').value;
+      loadLineChart(stationID, date);
+    });
+
+    document.getElementById('fromDateSelect').addEventListener('change', () => {
+      const stationID = document.getElementById('stationSelect').value;
+      const fromDate = document.getElementById('fromDateSelect').value;
+      const toDate = document.getElementById('toDateSelect').value;
+      if (fromDate && toDate) loadRangeLineChart(stationID, fromDate, toDate);
+    });
+
+    document.getElementById('toDateSelect').addEventListener('change', () => {
+      const stationID = document.getElementById('stationSelect').value;
+      const fromDate = document.getElementById('fromDateSelect').value;
+      const toDate = document.getElementById('toDateSelect').value;
+      if (fromDate && toDate) loadRangeLineChart(stationID, fromDate, toDate);
+    });
+
+    populateStations();
+  </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AQI Line Graph by Date</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-green-50 p-6 font-sans">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
+    <h1 class="text-2xl font-bold mb-6 text-green-800">AQI Line Graph</h1>
+
+    <!-- Station Dropdown -->
+    <div class="mb-4">
+      <label class="block text-sm font-semibold text-green-700" for="stationSelect">Select Station:</label>
+      <select id="stationSelect" class="border p-2 rounded w-full max-w-xs">
+        <option value="">Loading stations...</option>
+      </select>
+    </div>
+
+    <!-- Date Dropdown -->
+    <div class="mb-6">
+      <label class="block text-sm font-semibold text-green-700" for="dateSelect">Select Date:</label>
+      <select id="dateSelect" class="border p-2 rounded w-full max-w-xs" disabled>
+        <option value="">Select station first</option>
+      </select>
+    </div>
+
+    <!-- AQI Chart -->
+    <canvas id="aqiChart" height="100"></canvas>
+
+    <div class="mt-4">
+      <button id="downloadBtn" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">
+        Download Chart
+      </button>
+
+      <button id="downloadCsvBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2">
+        Download CSV
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const baseUrl = window.location.origin.replace(':5500', ':5000'); // adjust port if needed
+    const stationSelect = document.getElementById('stationSelect');
+    const dateSelect = document.getElementById('dateSelect');
+    const ctx = document.getElementById('aqiChart').getContext('2d');
+    let chart;
+
+    // Load station list
+    async function loadStations() {
+      const res = await fetch(`${baseUrl}/stations`);
+      const stations = await res.json();
+      stationSelect.innerHTML = `<option value="">-- Select Station --</option>`;
+      stations.forEach(station => {
+        const option = document.createElement('option');
+        option.value = station.stationID;
+        option.textContent = station.stationID;
+        stationSelect.appendChild(option);
+      });
+    }
+
+    // Load available dates for selected station
+    async function loadDates(stationID) {
+      const res = await fetch(`${baseUrl}/dates/${stationID}`);
+      const dates = await res.json();
+      dateSelect.disabled = false;
+      dateSelect.innerHTML = `<option value="">-- Select Date --</option>`;
+      dates.forEach(date => {
+        const option = document.createElement('option');
+        option.value = date;
+        option.textContent = date;
+        dateSelect.appendChild(option);
+      });
+    }
+
+    // Load and display AQI for station + specific date
+    async function loadAndPlotAQI(stationID, selectedDate) {
+      const res = await fetch(`${baseUrl}/aqi/stations/${stationID}`);
+      const data = await res.json();
+
+      // Filter data by selected date
+      const filtered = data.filter(entry => {
+        const dateOnly = new Date(entry.date_time).toISOString().split('T')[0];
+        return dateOnly === selectedDate;
+      });
+
+      if (!filtered || filtered.length === 0) {
+        alert("No AQI data available for this date.");
+        return;
+      }
+
+      const labels = filtered.map(d => new Date(d.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      const aqiValues = filtered.map(d => d.aqi);
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: `AQI on ${selectedDate} (${stationID})`,
+            data: aqiValues,
+            borderColor: '#5D8736',
+            backgroundColor: 'rgba(129, 199, 132, 0.2)',
+            pointBackgroundColor: '#A9C46C',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'AQI' }
+            },
+            x: {
+              title: { display: true, text: 'Time' }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => `AQI: ${ctx.raw}`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Event Listeners
+    stationSelect.addEventListener('change', () => {
+      const stationID = stationSelect.value;
+      if (stationID) {
+        loadDates(stationID);
+        dateSelect.innerHTML = `<option value="">Loading dates...</option>`;
+      } else {
+        dateSelect.disabled = true;
+        dateSelect.innerHTML = `<option value="">Select station first</option>`;
+      }
+    });
+
+    dateSelect.addEventListener('change', () => {
+      const stationID = stationSelect.value;
+      const selectedDate = dateSelect.value;
+      if (stationID && selectedDate) {
+        loadAndPlotAQI(stationID, selectedDate);
+      }
+    });
+
+    // Download chart as image
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    if (!chart) {
+      alert("No chart to download yet.");
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = chart.toBase64Image(); // PNG base64
+    link.download = `AQI_chart_${stationSelect.value}_${dateSelect.value}.png`;
+    link.click();
+  });
+
+  document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+  const stationID = stationSelect.value;
+  const selectedDate = dateSelect.value;
+
+  if (!stationID || !selectedDate) {
+    alert("Please select both station and date first.");
+    return;
+  }
+
+  fetch(`${baseUrl}/aqi/stations/${stationID}`)
+    .then(res => res.json())
+    .then(data => {
+      const filtered = data.filter(entry => {
+        const dateOnly = new Date(entry.date_time).toISOString().split('T')[0];
+        return dateOnly === selectedDate;
+      });
+
+      if (filtered.length === 0) {
+        alert("No AQI data available to download.");
+        return;
+      }
+
+      let csv = "Time,AQI\n";
+      filtered.forEach(entry => {
+        const time = new Date(entry.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        csv += `${time},${entry.aqi}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `AQI_${stationID}_${selectedDate}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+});
+
+
+    // Initial load
+    loadStations();
+  </script>
+</body>
+</html>
