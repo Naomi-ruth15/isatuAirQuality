@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
+  <title>Air Quality Monitoring</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     * {
@@ -31,7 +31,8 @@
       border: none;
     }
     .nav-link {
-      display: block;
+      display: flex;
+      align-items: center;
       padding: 10px;
       border-radius: 5px;
       transition: background 0.3s, color 0.3s;
@@ -45,29 +46,90 @@
       color: #1a2417;
       font-weight: bold;
     }
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+    }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 8px 8px 32px;
+    }
+    .dropdown-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body class="bg-[#abc8a2] text-green-900">
   <!-- Sidebar -->
   <div class="w-1/6 bg-[#1a2417] h-screen text-center p-4 text-white sidebar">
     <ul class="space-y-4 text-left">
-      <li><a href="maindashboard.html" class="nav-link active">Dashboard</a></li>
+      <li>
+        <a href="maindashboard.html" class="nav-link active">
+          <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/grid.svg" class="nav-icon" alt="Dashboard" />
+          Dashboard
+        </a>
+      </li>
       
       <!-- Parameters with Dropdown -->
       <li>
         <div class="relative">
-          <button id="parametersToggle" class="nav-link w-full text-left">Parameters</button>
+          <button id="parametersToggle" class="nav-link w-full text-left">
+            <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/sliders.svg" class="nav-icon" alt="Parameters" />
+            Parameters
+          </button>
           <ul id="parametersDropdown" class="hidden absolute left-0 mt-2 w-full bg-white text-green-900 rounded shadow-md z-10">
-            <li><a href="parameters/tvoc.html" class="block px-4 py-2 hover:bg-[#fef9e1]">TVOC</a></li>
-            <li><a href="parameters/eco2.html" class="block px-4 py-2 hover:bg-[#fef9e1]">eCO2</a></li>
-            <li><a href="parameters/temperature.html" class="block px-4 py-2 hover:bg-[#fef9e1]">Temperature</a></li>
-            <li><a href="parameters/humidity.html" class="block px-4 py-2 hover:bg-[#fef9e1]">Humidity</a></li>
-            <li><a href="parameters/dustDensity.html" class="block px-4 py-2 hover:bg-[#fef9e1]">Dust Density</a></li>
+            <li>
+              <a href="parameters/tvoc.html" class="dropdown-item hover:bg-[#fef9e1]">
+                <img src="https://cdn.jsdelivr.net/npm/@tabler/icons@2.18.0/icons/molecule.svg" class="dropdown-icon" alt="TVOC" />
+                TVOC
+              </a>
+            </li>
+            <li>
+              <a href="parameters/eco2.html" class="dropdown-item hover:bg-[#fef9e1]">
+                <img src="https://cdn.jsdelivr.net/npm/@tabler/icons@2.18.0/icons/cloud.svg" class="dropdown-icon" alt="eCO2" />
+                eCO2
+              </a>
+            </li>
+            <li>
+              <a href="parameters/temperature.html" class="dropdown-item hover:bg-[#fef9e1]">
+                <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/thermometer.svg" class="dropdown-icon" alt="Temperature" />
+                Temperature
+              </a>
+            </li>
+            <li>
+              <a href="parameters/humidity.html" class="dropdown-item hover:bg-[#fef9e1]">
+                <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/droplet.svg" class="dropdown-icon" alt="Humidity" />
+                Humidity
+              </a>
+            </li>
+            <li>
+              <a href="parameters/dustDensity.html" class="dropdown-item hover:bg-[#fef9e1]">
+                <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.2.96/svg/air-filter.svg" class="dropdown-icon" alt="Dust Density" />
+                Dust Density
+              </a>
+            </li>
           </ul>
         </div>
       </li>
 
-      <li><a href="historicalAQI.html" class="nav-link">History</a></li>
+      <li>
+        <a href="history.html" class="nav-link">
+          <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/clock.svg" class="nav-icon" alt="History" />
+          History
+        </a>
+      </li>
+      
+      <!-- Additional navigation item for Air Quality -->
+      <li>
+        <a href="historicalAQI.html" class="nav-link">
+          <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/wind.svg" class="nav-icon" alt="Air Quality" />
+          Air Quality Index
+        </a>
+      </li>
     </ul>
   </div>
 
@@ -96,7 +158,7 @@
         link.addEventListener("click", function (event) {
           const url = this.getAttribute("href");
 
-          if (url) {
+          if (url && !this.closest("#parametersDropdown")) {
             event.preventDefault();
 
             // Remove active class from sidebar main nav links
@@ -113,6 +175,34 @@
           }
         });
       });
+
+      // Close dropdown when clicking outside
+      document.addEventListener("click", function(event) {
+        if (!parametersToggle.contains(event.target) && !parametersDropdown.contains(event.target)) {
+          parametersDropdown.classList.add("hidden");
+        }
+      });
+      
+      // Apply SVG color filter for proper visibility (white in dark sidebar)
+      const applyIconColors = () => {
+        document.querySelectorAll(".nav-icon, .dropdown-icon").forEach(icon => {
+          // Apply white filter for sidebar icons
+          if (icon.closest(".sidebar") && !icon.closest("#parametersDropdown")) {
+            icon.style.filter = "invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%)";
+          }
+          // Reset filter for dropdown icons (dark text on white background)
+          if (icon.closest("#parametersDropdown")) {
+            icon.style.filter = "invert(20%) sepia(13%) saturate(841%) hue-rotate(76deg) brightness(94%) contrast(91%)";
+          }
+        });
+      };
+      
+      // Run initially and after DOM changes
+      applyIconColors();
+      
+      // Watch for dropdown toggle to reapply colors
+      const observer = new MutationObserver(applyIconColors);
+      observer.observe(parametersDropdown, { attributes: true });
     });
   </script>
 </body>

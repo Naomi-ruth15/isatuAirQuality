@@ -48,6 +48,16 @@
     <!-- Line Graph -->
     <div class="mb-12">
       <canvas id="lineChart" class="bg-white p-4 rounded-lg shadow w-full h-[400]"></canvas>
+
+       <div class="mt-4">
+      <button id="downloadBtn" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">
+        Download Chart
+      </button>
+
+      <button id="downloadCsvBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2">
+        Download CSV
+      </button>
+    </div>
     </div>
 
     <!-- Bar Graph -->
@@ -244,6 +254,59 @@
       const toDate = document.getElementById('toDateSelect').value;
       if (fromDate && toDate) loadRangeLineChart(stationID, fromDate, toDate);
     });
+
+    // Download chart as image
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    if (!lineChartInstance) {
+      alert("No chart to download yet.");
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = lineChartInstance.toBase64Image(); // PNG base64
+    const station = document.getElementById('stationSelect').value;
+    const date = document.getElementById('dateSelect').value;
+    link.download = `TVOC_chart_${station}_${date}.png`;
+
+    link.click();
+  });
+
+  //for downloading in csv
+  document.getElementById('downloadCsvBtn').addEventListener('click', async () => {
+    const stationID = document.getElementById('stationSelect').value;
+    const date = document.getElementById('dateSelect').value;
+
+    if (!stationID || !date) {
+      alert("Please select a station and date first.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/parameter/tvoc/${stationID}/${date}`);
+      const data = await res.json();
+
+      if (data.length === 0) {
+        alert("No data available to download.");
+        return;
+      }
+
+      let csv = "Time,TVOC (ppb)\n";
+      data.forEach(entry => {
+        const time = new Date(entry.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        csv += `${time},${entry.tvoc}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `TVOC_${stationID}_${date}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to fetch TVOC data for CSV download:", err);
+      alert("Failed to download CSV.");
+    }
+  });
 
     populateStations();
   </script>

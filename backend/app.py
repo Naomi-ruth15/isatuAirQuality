@@ -615,4 +615,4 @@ def get_aqi_by_station_and_date(station_id, date):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
