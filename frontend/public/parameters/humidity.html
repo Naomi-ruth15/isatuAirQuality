@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Temperature</title>
+  <title>Humidity</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800">
   <div class="container mx-auto mt-10 px-4">
-    <h1 class="text-2xl font-bold mb-6">Temperature Viewer</h1>
+    <h1 class="text-2xl font-bold mb-6">Humidity Viewer</h1>
 
     <!-- Station and Date Select -->
     <div class="mb-6 flex flex-col md:flex-row gap-4">
@@ -49,17 +49,15 @@
     </div>
 
     <!-- Bar Graph -->
-    <h1 class="text-2xl font-bold mb-6">Temperature Bar Graph by Station</h1>
-    <canvas id="tempChart" class="bg-white p-4 rounded-lg shadow"></canvas>
+    <h1 class="text-2xl font-bold mb-6">Humidity Bar Graph by Station</h1>
+    <canvas id="humidityChart" class="bg-white p-4 rounded-lg shadow"></canvas>
   </div>
-  
-  
 
   <script>
     let lineChartInstance;
 
-async function populateStations() {
-  const res = await fetch('http://127.0.0.1:5000/stations');
+    async function populateStations() {
+  const res = await fetch('https://isatuambiance.onrender.com/stations');
   const stations = await res.json();
 
   const select = document.getElementById('stationSelect');
@@ -74,7 +72,7 @@ async function populateStations() {
 async function populateDates(stationID) {
   if (!stationID) return;
 
-  const res = await fetch(`http://127.0.0.1:5000/dates/${stationID}`);
+  const res = await fetch(`https://isatuambiance.onrender.com/dates/${stationID}`);
   const dates = await res.json();
 
   const dateSelect = document.getElementById('dateSelect');
@@ -98,11 +96,11 @@ async function populateDates(stationID) {
 async function loadLineChart(stationID, date) {
   if (!stationID || !date) return;
 
-  const res = await fetch(`http://127.0.0.1:5000/parameter/temperature/${stationID}/${date}`);
+  const res = await fetch(`https://isatuambiance.onrender.com/parameter/humidity/${stationID}/${date}`);
   const data = await res.json();
 
   const labels = data.map(entry => entry.date_time);
-  const values = data.map(entry => entry.temperature);
+  const values = data.map(entry => entry.humidity);
 
   updateLineChart(labels, values, stationID, date);
 }
@@ -110,11 +108,11 @@ async function loadLineChart(stationID, date) {
 async function loadRangeLineChart(stationID, fromDate, toDate) {
   if (!stationID || !fromDate || !toDate) return;
 
-  const res = await fetch(`http://127.0.0.1:5000/parameter/temperature/${stationID}/${fromDate}/${toDate}`);
+  const res = await fetch(`https://isatuambiance.onrender.com/parameter/humidity/${stationID}/${fromDate}/${toDate}`);
   const data = await res.json();
 
   let labels = data.map(entry => entry[0]); //date_time
-  let values = data.map(entry => entry[1]); //temperature
+  let values = data.map(entry => entry[1]); //humidity
 
   console.log("Fetched data:", data);
   console.log("Labels: ", labels);
@@ -149,48 +147,48 @@ function updateLineChart(labels, data, stationID, dateLabel) {
         legend: { display: true },
         title: {
           display: true,
-          text: `Temperature Over Time - ${stationID} (${dateLabel})`
+          text: `Humidity Over Time - ${stationID} (${dateLabel})`
         }
       },
       scales: {
         x: { title: { display: true, text: 'Time' }},
         y: {
           beginAtZero: true,
-          title: { display: true, text: 'Temperature (celsius)' }
+          title: { display: true, text: 'Humidity (%)' }
         }
       }
     }
   });
 }
 
-    //for bar graph
-    fetch('http://127.0.0.1:5000/parameter/temperature')
+//for bar graph
+    fetch('https://isatuambiance.onrender.com/parameter/humidity')
       .then(response => response.json())
       .then(data => {
         const labels = [];
-        const temperatureValues = [];
+        const humidityValues = [];
         const tooltips = [];
 
-        const seen = new Set();
+        const seen = new Set(); // Prevent duplicate stations
         data.forEach(item => {
           if (!seen.has(item.stationID)) {
             seen.add(item.stationID);
             labels.push(item.stationID);
-            temperatureValues.push(item.temperature);
+            humidityValues.push(item.humidity);
             tooltips.push(item.date_time);
           }
         });
 
-        const ctx = document.getElementById('tempChart').getContext('2d');
+        const ctx = document.getElementById('humidityChart').getContext('2d');
         new Chart(ctx, {
           type: 'bar',
           data: {
             labels: labels,
             datasets: [{
-              label: 'Temperature (°C)',
-              data: temperatureValues,
-              backgroundColor: 'rgba(255, 99, 132, 0.6)',
-              borderColor: 'rgba(255, 99, 132, 1)',
+              label: 'Humidity (%)',
+              data: humidityValues,
+              backgroundColor: 'rgba(54, 162, 235, 0.6)',
+              borderColor: 'rgba(54, 162, 235, 1)',
               borderWidth: 1
             }]
           },
@@ -201,7 +199,7 @@ function updateLineChart(labels, data, stationID, dateLabel) {
                 callbacks: {
                   label: function(context) {
                     const index = context.dataIndex;
-                    return `Temperature: ${context.raw}°C, Time: ${tooltips[index]}`;
+                    return `Humidity: ${context.raw}%, Time: ${tooltips[index]}`;
                   }
                 }
               },
@@ -210,7 +208,7 @@ function updateLineChart(labels, data, stationID, dateLabel) {
               },
               title: {
                 display: true,
-                text: 'Temperature Values per Station'
+                text: 'Humidity Values per Station'
               }
             },
             scales: {
@@ -224,16 +222,16 @@ function updateLineChart(labels, data, stationID, dateLabel) {
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: 'Temperature (°C)'
+                  text: 'Humidity (%)'
                 }
               }
             }
           }
         });
       })
-      .catch(error => console.error('Error fetching temperature data:', error));
+      .catch(error => console.error('Error fetching humidity data:', error));
 
-    //Event listeners:
+      //Event listeners:
     document.getElementById('stationSelect').addEventListener('change', () => {
       const stationID = document.getElementById('stationSelect').value;
       populateDates(stationID);

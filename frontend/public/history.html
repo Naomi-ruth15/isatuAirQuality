@@ -37,7 +37,7 @@
 
   <script>
     // Populate dropdown
-    fetch('http://127.0.0.1:5000/stations')
+    fetch('https://isatuambiance.onrender.com/stations')
       .then(res => res.json())
       .then(stations => {
         const select = document.getElementById('stationSelect');
@@ -54,7 +54,7 @@
       const stationID = this.value;
       if (!stationID) return;
 
-      fetch(`http://127.0.0.1:5000/stations/${stationID}`)
+      fetch(`https://isatuambiance.onrender.com/stations/${stationID}`)
         .then(res => res.json())
         .then(data => {
           const headerRow = document.getElementById('tableHeader');

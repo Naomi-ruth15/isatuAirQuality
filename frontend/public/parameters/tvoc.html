@@ -69,7 +69,7 @@
     let lineChartInstance;
 
     async function populateStations() {
-      const res = await fetch('http://127.0.0.1:5000/stations');
+      const res = await fetch('https://isatuambiance.onrender.com/stations');
       const stations = await res.json();
 
       const select = document.getElementById('stationSelect');
@@ -84,7 +84,7 @@
     async function populateDates(stationID) {
       if (!stationID) return;
 
-      const res = await fetch(`http://127.0.0.1:5000/dates/${stationID}`);
+      const res = await fetch(`https://isatuambiance.onrender.com/dates/${stationID}`);
       const dates = await res.json();
 
       const dateSelect = document.getElementById('dateSelect');
@@ -107,7 +107,7 @@
     async function loadLineChart(stationID, date) {
       if (!stationID || !date) return;
 
-      const res = await fetch(`http://127.0.0.1:5000/parameter/tvoc/${stationID}/${date}`);
+      const res = await fetch(`https://isatuambiance.onrender.com/parameter/tvoc/${stationID}/${date}`);
       const data = await res.json();
 
       const labels = data.map(entry => entry.date_time);
@@ -119,7 +119,7 @@
     async function loadRangeLineChart(stationID, fromDate, toDate) {
       if (!stationID || !fromDate || !toDate) return;
 
-      const res = await fetch(`http://127.0.0.1:5000/parameter/tvoc/${stationID}/${fromDate}/${toDate}`);
+      const res = await fetch(`https://isatuambiance.onrender.com/parameter/tvoc/${stationID}/${fromDate}/${toDate}`);
       const data = await res.json();
 
       let labels = data.map(entry => entry[0]); //date_time
@@ -174,7 +174,7 @@
     }
 
     // Bar chart
-    fetch('http://127.0.0.1:5000/parameter/tvoc')
+    fetch('https://isatuambiance.onrender.com/parameter/tvoc')
       .then(response => response.json())
       .then(data => {
         const labels = [];
@@ -281,7 +281,7 @@
     }
 
     try {
-      const res = await fetch(`http://127.0.0.1:5000/parameter/tvoc/${stationID}/${date}`);
+      const res = await fetch(`https://isatuambiance.onrender.com/parameter/tvoc/${stationID}/${date}`);
       const data = await res.json();
 
       if (data.length === 0) {

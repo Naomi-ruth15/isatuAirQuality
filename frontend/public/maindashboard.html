@@ -132,7 +132,7 @@
     }
 
     function fetchLatestData() {
-      fetch('http://127.0.0.1:5000/latest')
+      fetch('https://isatuambiance.onrender.com/latest')
         .then(res => res.json())
         .then(data => {
           if (!data || Object.keys(data).length === 0) return;
@@ -159,7 +159,7 @@
       const id = this.value;
       if (!id) return;
 
-      fetch(`http://127.0.0.1:5000/stations/${id}`)
+      fetch(`https://isatuambiance.onrender.com/stations/${id}`)
         .then(res => res.json())
         .then(data => {
           if (!data || data.length === 0) return;
@@ -184,7 +184,7 @@
         });
     });
 
-    fetch('http://127.0.0.1:5000/stations')
+    fetch('https://isatuambiance.onrender.com/stations')
       .then(res => res.json())
       .then(stations => {
         const select = document.getElementById('stationSelect');
