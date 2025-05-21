@@ -10,8 +10,6 @@
 </head>
 <body>
   <div class="min-h-screen bg-gray-100 p-6">
-    <div class="flex flex-col md:flex-row gap-4 justify-center items-start mb-6">
-      <div class="bg-white shadow-lg rounded-xl p-4">
         <div class="mb-4">
           <label for="stationSelect" class="text-xl font-semibold text-gray-800 block mb-2">Select Station:</label>
           <select id="stationSelect" class="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -19,12 +17,15 @@
           </select>
           <p id="lastUpdated" class="text-sm text-gray-500 mt-2"></p>
         </div>
-      </div>
-      <div class="bg-white shadow-lg rounded-xl p-4 w-full md:w-2/3">
-        <h2 class="text-xl font-bold mb-4">Weighted Data & AQI</h2>
-        <div id="weightedContainer" class="grid grid-cols-1"></div>
-      </div>
-    </div>
+    <div class="flex-row bg-yellow w-full h-1/3">
+      <div class="flex flex-row md:flex-row gap-4 justify-center items-start mb-2">
+        <div class="bg-white shadow-lg rounded-xl h-40 w-full md:w-1/4">
+          <div class="flex flex-row text-m text-gray-500 mt-2 mb-0 justify-center">AQI</div>
+          <div id="weightedContainer" class="grid grid-cols-1 -mt-8"></div>
+        </div>
+        <div class="bg-white shadow-lg rounded-xl p-4 h-fit w-full md:w-2/3">AQI graph</div>
+        </div>
+    </div> 
 
     <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
       <div class="bg-white shadow-lg rounded-lg p-4 flex flex-col items-center">
@@ -124,11 +125,35 @@
 
     function displayTotalScore(score) {
       const weightedContainer = document.getElementById('weightedContainer');
-      weightedContainer.innerHTML = '';
-      const scoreDiv = document.createElement('div');
-      scoreDiv.className = 'bg-white shadow p-4 rounded font-semibold text-center';
-      scoreDiv.innerHTML = `<strong>Total Score:</strong> ${score.toFixed(2)}`;
-      weightedContainer.appendChild(scoreDiv);
+      weightedContainer.innerHTML = `
+  <div class="flex flex-col items-center">
+    <div id="totalGauge" style="height: 200px; width: 200px;"></div>
+  </div>
+`;
+if (gauges.total) {
+  gauges.total.refresh(score);
+} else {
+  gauges.total = new JustGage({
+    id: "totalGauge",
+    value: score,
+    min: 0,
+    max: 100,
+    label: "%",
+    levelColors: ["#A9C46C", "#809D3C", "#5D8736", "#D97706", "#DC2626"],
+    customSectors: [{
+      color: "#A9C46C", lo: 0, hi: 20
+    }, {
+      color: "#809D3C", lo: 21, hi: 40
+    }, {
+      color: "#5D8736", lo: 41, hi: 60
+    }, {
+      color: "#D97706", lo: 61, hi: 80
+    }, {
+      color: "#DC2626", lo: 81, hi: 100
+    }]
+  });
+}
+
     }
 
     function fetchLatestData() {

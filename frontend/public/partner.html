@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ambiance Project - Partner SUC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .partner-card {
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 6px rgba(0, 255, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            color: #d1fae5;
+        }
+
+        .partner-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .partner-logo {
+            max-height: 120px;
+            object-fit: contain;
+        }
+
+        header nav a:hover {
+            background-color: #22c55e;
+            color: black;
+        }
+    </style>
+</head>
+
+<body class="bg-black text-white text-sm">
+
+    <!-- Header -->
+    <header class="sticky top-0 bg-black p-3 z-50 shadow-xl border-b border-green-400">
+        <nav class="flex flex-wrap justify-center gap-2 sm:gap-4 text-sm sm:text-base">
+            <a href="home.html" class="px-3 py-1 rounded transition">HOME</a>
+            <a href="dashboard.html" class="px-3 py-1 rounded transition">DASHBOARD</a>
+            <a href="mission.html" class="px-3 py-1 rounded transition">MISSION</a>
+            <a href="team.html" class="px-3 py-1 rounded transition">TEAM</a>
+            <a href="partner.html" class="px-3 py-1 rounded transition">PARTNER SUC</a>
+            <a href="contact.html" class="px-3 py-1 rounded transition">CONTACT</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="bg-gradient-to-b from-black to-green-900 px-4 sm:px-6 py-16 min-h-screen">
+        <div class="text-center mb-12">
+            <h1 class="text-2xl sm:text-3xl font-bold text-green-300">Partner SUCs</h1>
+            <p class="text-green-200 text-sm mt-2">Our collaboration with other State Universities and Colleges</p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+
+            <!-- Example Partner Logos -->
+            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+                <img src="images/u-1.png" alt="Partner 1 Logo" class="partner-logo" />
+            </div>
+
+            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+                <img src="images/u-2.png" alt="Partner 2 Logo" class="partner-logo" />
+            </div>
+
+            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+                <img src="images/u-3.png" alt="Partner 3 Logo" class="partner-logo" />
+            </div>
+
+            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+                <img src="images/u-4.png" alt="Partner 4 Logo" class="partner-logo" />
+            </div>
+
+            <!-- Add more partner logos as needed -->
+            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+                <img src="images/u-5.png" alt="Partner 5 Logo" class="partner-logo" />
+            </div>
+
+            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+                <img src="images/u-6.png" alt="Partner 6 Logo" class="partner-logo" />
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-green-400 py-4 text-center text-green-200 text-sm">
+        &copy; 2025 ISAT U Ambiance Project. All rights reserved.
+    </footer>
+
+</body>
+
+</html>
