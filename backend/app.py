@@ -137,11 +137,13 @@ def get_stations():
 @app.route('/stations/<station_id>')
 def get_data_by_station(station_id):
     conn = get_connection()
-    cursor = conn.cursor(dictionary = True)
+    cursor = conn.cursor(dictionary=True)
 
     cursor.execute("""
-            SELECT * FROM aqi_data WHERE stationID = %s
-        """, (station_id,))
+        SELECT * FROM aqi_data 
+        WHERE stationID = %s 
+        ORDER BY date_time DESC
+    """, (station_id,))
     
     result = cursor.fetchall()
 
