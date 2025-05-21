@@ -73,8 +73,12 @@
           Dashboard
         </a>
       </li>
-      
-      <!-- Parameters with Dropdown -->
+      <li>
+        <a href="home.html" class="flex flex-row ml-2">
+          <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/home.svg" class="nav-icon" alt="Home" />
+          Home
+        </a>
+      </li>
       <li>
         <div class="relative">
           <button id="parametersToggle" class="nav-link w-full text-left">
@@ -115,15 +119,12 @@
           </ul>
         </div>
       </li>
-
       <li>
         <a href="history.html" class="nav-link">
           <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/clock.svg" class="nav-icon" alt="History" />
           History
         </a>
       </li>
-      
-      <!-- Additional navigation item for Air Quality -->
       <li>
         <a href="historicalAQI.html" class="nav-link">
           <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/wind.svg" class="nav-icon" alt="Air Quality" />
@@ -147,26 +148,32 @@
       const parametersToggle = document.getElementById("parametersToggle");
       const parametersDropdown = document.getElementById("parametersDropdown");
 
-      // Toggle dropdown on click
+      // Toggle dropdown
       parametersToggle.addEventListener("click", function (e) {
         e.preventDefault();
         parametersDropdown.classList.toggle("hidden");
       });
 
-      // Handle iframe loading for all links
+      // Handle link clicks
       document.querySelectorAll("a").forEach(link => {
         link.addEventListener("click", function (event) {
           const url = this.getAttribute("href");
+
+          if (url === "home.html") {
+            // Let Home open in full page
+            return;
+          }
+
           if (url) {
             event.preventDefault();
 
-            // Remove active class from main nav links
+            // Update active class
             links.forEach(l => l.classList.remove("active"));
             if (this.classList.contains("nav-link")) {
               this.classList.add("active");
             }
 
-            // Set iframe src
+            // Load iframe
             contentFrame.src = url;
 
             // Close dropdown
@@ -175,31 +182,26 @@
         });
       });
 
-      // Close dropdown when clicking outside
+      // Close dropdown on outside click
       document.addEventListener("click", function(event) {
         if (!parametersToggle.contains(event.target) && !parametersDropdown.contains(event.target)) {
           parametersDropdown.classList.add("hidden");
         }
       });
 
-      // Apply SVG color filter for proper visibility (white in dark sidebar)
+      // Icon color logic
       const applyIconColors = () => {
         document.querySelectorAll(".nav-icon, .dropdown-icon").forEach(icon => {
-          // Apply white filter for sidebar icons
           if (icon.closest(".sidebar") && !icon.closest("#parametersDropdown")) {
             icon.style.filter = "invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%)";
           }
-          // Reset filter for dropdown icons (dark text on white background)
           if (icon.closest("#parametersDropdown")) {
             icon.style.filter = "invert(20%) sepia(13%) saturate(841%) hue-rotate(76deg) brightness(94%) contrast(91%)";
           }
         });
       };
 
-      // Run initially and after DOM changes
       applyIconColors();
-      
-      // Watch for dropdown toggle to reapply colors
       const observer = new MutationObserver(applyIconColors);
       observer.observe(parametersDropdown, { attributes: true });
     });
