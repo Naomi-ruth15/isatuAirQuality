@@ -157,11 +157,10 @@
       document.querySelectorAll("a").forEach(link => {
         link.addEventListener("click", function (event) {
           const url = this.getAttribute("href");
-
-          if (url && !this.closest("#parametersDropdown")) {
+          if (url) {
             event.preventDefault();
 
-            // Remove active class from sidebar main nav links
+            // Remove active class from main nav links
             links.forEach(l => l.classList.remove("active"));
             if (this.classList.contains("nav-link")) {
               this.classList.add("active");
@@ -170,7 +169,7 @@
             // Set iframe src
             contentFrame.src = url;
 
-            // Close dropdown if open
+            // Close dropdown
             parametersDropdown.classList.add("hidden");
           }
         });
@@ -182,7 +181,7 @@
           parametersDropdown.classList.add("hidden");
         }
       });
-      
+
       // Apply SVG color filter for proper visibility (white in dark sidebar)
       const applyIconColors = () => {
         document.querySelectorAll(".nav-icon, .dropdown-icon").forEach(icon => {
@@ -196,7 +195,7 @@
           }
         });
       };
-      
+
       // Run initially and after DOM changes
       applyIconColors();
       
