@@ -48,7 +48,7 @@
 
     // Load station list
     async function loadStations() {
-      const res = await fetch(`https://isatuambiance.onrender.com/stations`);
+      const res = await fetch(`https://isatuairquality.onrender.com/stations`);
       const stations = await res.json();
       stationSelect.innerHTML = `<option value="">-- Select Station --</option>`;
       stations.forEach(station => {
@@ -61,7 +61,7 @@
 
     // Load available dates for selected station
     async function loadDates(stationID) {
-      const res = await fetch(`https://isatuambiance.onrender.com/dates/${stationID}`);
+      const res = await fetch(`https://isatuairquality.onrender.com/dates/${stationID}`);
       const dates = await res.json();
       dateSelect.disabled = false;
       dateSelect.innerHTML = `<option value="">-- Select Date --</option>`;
@@ -75,7 +75,7 @@
 
     // Load and display AQI for station + specific date
     async function loadAndPlotAQI(stationID, selectedDate) {
-      const res = await fetch(`https://isatuambiance.onrender.com/aqi/stations/${stationID}`);
+      const res = await fetch(`https://isatuairquality.onrender.com/aqi/stations/${stationID}`);
       const data = await res.json();
 
       // Filter data by selected date
@@ -171,7 +171,7 @@
     return;
   }
 
-  fetch(`https://isatuambiance.onrender.com/aqi/stations/${stationID}`)
+  fetch(`https://isatuairquality.onrender.com/aqi/stations/${stationID}`)
     .then(res => res.json())
     .then(data => {
       const filtered = data.filter(entry => {

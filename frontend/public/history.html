@@ -68,7 +68,7 @@
     let tableData = [];
 
     // Populate dropdown
-    fetch('https://isatuambiance.onrender.com/stations')
+    fetch('https://isatuairquality.onrender.com/stations')
       .then(res => res.json())
       .then(stations => {
         stations.forEach(station => {
@@ -84,7 +84,7 @@
       const stationID = this.value;
       if (!stationID) return;
 
-      fetch(`https://isatuambiance.onrender.com/stations/${stationID}`)
+      fetch(`https://isatuairquality.onrender.com/stations/${stationID}`)
         .then(res => res.json())
         .then(data => {
           currentPage = 1;

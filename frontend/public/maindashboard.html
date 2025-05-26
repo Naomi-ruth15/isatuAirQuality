@@ -184,11 +184,11 @@ if (gauges.total) {
       const id = this.value;
       if (!id) return;
 
-      fetch(`https://isatuambiance.onrender.com/stations/${id}`)
+      fetch(`https://isatuairquality.onrender.com/stations/${id}`)
         .then(res => res.json())
         .then(data => {
           if (!data || data.length === 0) return;
-          const latest = data[data.length - 1];
+          const latest = data[0];
 
           document.getElementById('dataContainer').innerHTML = '';
           document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
@@ -209,7 +209,7 @@ if (gauges.total) {
         });
     });
 
-    fetch('https://isatuambiance.onrender.com/stations')
+    fetch('https://isatuairquality.onrender.com/stations')
       .then(res => res.json())
       .then(stations => {
         const select = document.getElementById('stationSelect');

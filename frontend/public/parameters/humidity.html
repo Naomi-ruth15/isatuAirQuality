@@ -57,7 +57,7 @@
     let lineChartInstance;
 
     async function populateStations() {
-  const res = await fetch('https://isatuambiance.onrender.com/stations');
+  const res = await fetch('https://isatuairquality.onrender.com/stations');
   const stations = await res.json();
 
   const select = document.getElementById('stationSelect');
@@ -72,7 +72,7 @@
 async function populateDates(stationID) {
   if (!stationID) return;
 
-  const res = await fetch(`https://isatuambiance.onrender.com/dates/${stationID}`);
+  const res = await fetch(`https://isatuairquality.onrender.com/dates/${stationID}`);
   const dates = await res.json();
 
   const dateSelect = document.getElementById('dateSelect');
@@ -96,7 +96,7 @@ async function populateDates(stationID) {
 async function loadLineChart(stationID, date) {
   if (!stationID || !date) return;
 
-  const res = await fetch(`https://isatuambiance.onrender.com/parameter/humidity/${stationID}/${date}`);
+  const res = await fetch(`https://isatuairquality.onrender.com/parameter/humidity/${stationID}/${date}`);
   const data = await res.json();
 
   const labels = data.map(entry => entry.date_time);
@@ -108,7 +108,7 @@ async function loadLineChart(stationID, date) {
 async function loadRangeLineChart(stationID, fromDate, toDate) {
   if (!stationID || !fromDate || !toDate) return;
 
-  const res = await fetch(`https://isatuambiance.onrender.com/parameter/humidity/${stationID}/${fromDate}/${toDate}`);
+  const res = await fetch(`https://isatuairquality.onrender.com/parameter/humidity/${stationID}/${fromDate}/${toDate}`);
   const data = await res.json();
 
   let labels = data.map(entry => entry[0]); //date_time
@@ -162,7 +162,7 @@ function updateLineChart(labels, data, stationID, dateLabel) {
 }
 
 //for bar graph
-    fetch('https://isatuambiance.onrender.com/parameter/humidity')
+    fetch('https://isatuairquality.onrender.com/parameter/humidity')
       .then(response => response.json())
       .then(data => {
         const labels = [];
