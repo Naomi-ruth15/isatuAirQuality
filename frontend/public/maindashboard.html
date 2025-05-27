@@ -124,15 +124,14 @@
     }
 
     function displayTotalScore(score) {
-      const weightedContainer = document.getElementById('weightedContainer');
-      weightedContainer.innerHTML = `
-  <div class="flex flex-col items-center">
-    <div id="totalGauge" style="height: 200px; width: 200px;"></div>
-  </div>
-`;
-if (gauges.total) {
-  gauges.total.refresh(score);
-} else {
+  const weightedContainer = document.getElementById('weightedContainer');
+  weightedContainer.innerHTML = `
+    <div class="flex flex-col items-center">
+      <div id="totalGauge" style="height: 200px; width: 200px;"></div>
+    </div>
+  `;
+
+  // Always reinitialize the gauge after updating the DOM
   gauges.total = new JustGage({
     id: "totalGauge",
     value: score,
@@ -140,24 +139,19 @@ if (gauges.total) {
     max: 100,
     label: "%",
     levelColors: ["#A9C46C", "#809D3C", "#5D8736", "#D97706", "#DC2626"],
-    customSectors: [{
-      color: "#A9C46C", lo: 0, hi: 20
-    }, {
-      color: "#809D3C", lo: 21, hi: 40
-    }, {
-      color: "#5D8736", lo: 41, hi: 60
-    }, {
-      color: "#D97706", lo: 61, hi: 80
-    }, {
-      color: "#DC2626", lo: 81, hi: 100
-    }]
+    customSectors: [
+      { color: "#A9C46C", lo: 0, hi: 20 },
+      { color: "#809D3C", lo: 21, hi: 40 },
+      { color: "#5D8736", lo: 41, hi: 60 },
+      { color: "#D97706", lo: 61, hi: 80 },
+      { color: "#DC2626", lo: 81, hi: 100 }
+    ]
   });
 }
 
-    }
 
     function fetchLatestData() {
-      fetch('https://isatuambiance.onrender.com/latest')
+      fetch('https://isatuairquality.onrender.com/latest')
         .then(res => res.json())
         .then(data => {
           if (!data || Object.keys(data).length === 0) return;

@@ -206,6 +206,93 @@ def get_aqidata_by_station(station_id):
 
     return jsonify(result)
 
+#dashboard aqi endpoint
+@app.route('/aqi/stations/<stationID>/latest', methods=['GET'])
+def get_latest_aqi_by_station(stationID):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Get the latest date for this station
+        cursor.execute("""
+            SELECT MAX(DATE(date_time)) AS latest_date
+            FROM aqi_data
+            WHERE stationID = %s
+        """, (stationID,))
+        row = cursor.fetchone()
+
+        if not row or not row['latest_date']:
+            return jsonify({'error': 'No data found for this station.'}), 404
+
+        latest_date = row['latest_date']
+
+        # Get all entries for that latest date
+        cursor.execute("""
+            SELECT date_time, stationID, tvoc, eCO2, humidity, temperature, dustDensity
+            FROM aqi_data
+            WHERE stationID = %s AND DATE(date_time) = %s
+            ORDER BY date_time ASC
+        """, (stationID, latest_date))
+        entries = cursor.fetchall()
+
+        # Compute AQI for each entry
+        result = []
+        for entry in entries:
+            aqi = compute_aqi(entry)
+            result.append({
+                'date_time': entry['date_time'].isoformat() if hasattr(entry['date_time'], 'isoformat') else str(entry['date_time']),
+                'stationID': entry['stationID'],
+                'aqi': round(aqi, 2)
+            })
+
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'error': 'Server error'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# Assuming this function exists
+def compute_aqi(entry):
+    try:
+        tvoc = float(entry['tvoc'] or 0)
+        eco2 = float(entry['eCO2'] or 0)
+        humidity = float(entry['humidity'] or 0)
+        temperature = float(entry['temperature'] or 0)
+        dust = float(entry['dustDensity'] or 0)
+    except Exception as e:
+        print("Invalid AQI data:", e)
+        return 0
+
+    # Example weights
+    weights = {
+        'tvoc': 0.2,
+        'eco2': 0.2,
+        'humidity': 0.2,
+        'temperature': 0.2,
+        'dust': 0.2
+    }
+
+    normalized = {
+        'tvoc': min(tvoc / 600, 1),
+        'eco2': min(eco2 / 2000, 1),
+        'humidity': min(abs(humidity - 50) / 50, 1),
+        'temperature': min(abs(temperature - 25) / 25, 1),
+        'dust': min(dust / 0.3, 1)
+    }
+
+    score = (
+        normalized['tvoc'] * weights['tvoc'] +
+        normalized['eco2'] * weights['eco2'] +
+        normalized['humidity'] * weights['humidity'] +
+        normalized['temperature'] * weights['temperature'] +
+        normalized['dust'] * weights['dust']
+    )
+
+    return (1 - score) * 100
+
 
 @app.route('/parameter/tvoc')
 def get_tvoc_data():
@@ -571,6 +658,66 @@ JOIN (
     conn.close()
     return jsonify(result)
 
+app.route('/parameter/dust/<station_id>')
+def get_dust_by_station(station_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT date_time, dustDensity
+        FROM aqi_data
+        WHERE stationID = %s
+        ORDER BY date_time ASC
+    """, (station_id,))
+    
+    result = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify(result)
+
+#date and time dropdown (one day data)
+@app.route('/parameter/dust/<station_id>/<date>')
+def get_dust_by_station_and_date(station_id, date):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT date_time, dustDensity
+        FROM aqi_data
+        WHERE stationID = %s AND DATE(date_time) = %s
+        ORDER BY date_time ASC
+    """, (station_id, date))
+
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    return jsonify(result)
+
+#for date and time dropdown (from-to)
+@app.route('/parameter/dust/<stationID>/<from_date>/<to_date>')
+def get_dust_range(stationID, from_date, to_date):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    to_date_dt = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
+    to_date_plus_one = to_date_dt.strftime("%Y-%m-%d")
+
+    cursor.execute("""SELECT date_time, dustDensity
+FROM aqi_data WHERE stationID = %s
+AND date_time >= %s AND date_time < %s
+ORDER BY date_time ASC
+""", (stationID, from_date, to_date_plus_one))
+
+    
+    result = cursor.fetchall()
+
+    print("Fetched dust data:", result)
+    cursor.close()
+    conn.close()
+    return jsonify(result)
 
 #for the AQI:
 @app.route('/aqi/<station_id>/<date>')
