@@ -266,13 +266,12 @@ def compute_aqi(entry):
         print("Invalid AQI data:", e)
         return 0
 
-    # Example weights
     weights = {
-        'tvoc': 0.2,
-        'eco2': 0.2,
-        'humidity': 0.2,
-        'temperature': 0.2,
-        'dust': 0.2
+        'tvoc': 0.25,
+        'eco2': 0.25,
+        'humidity': 0.15,
+        'temperature': 0.10,
+        'dust': 0.25
     }
 
     normalized = {

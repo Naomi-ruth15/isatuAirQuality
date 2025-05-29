@@ -2,97 +2,97 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ambiance Project - Partner SUC</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ambiance Project - Partner SUC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+    .partner-card {
+      background: white;
+      border: 1px solid #dbeafe;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
 
-        .partner-card {
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 6px rgba(0, 255, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            color: #d1fae5;
-        }
+    .partner-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
 
-        .partner-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
-        }
+    .partner-logo {
+      max-height: 100px;
+      object-fit: contain;
+    }
 
-        .partner-logo {
-            max-height: 120px;
-            object-fit: contain;
-        }
-
-        header nav a:hover {
-            background-color: #22c55e;
-            color: black;
-        }
-    </style>
+    header nav a:hover {
+      background-color: #3b82f6;
+      color: white;
+    }
+  </style>
 </head>
 
-<body class="bg-black text-white text-sm">
+<body class="bg-white text-gray-800 text-sm">
 
-    <!-- Header -->
-    <header class="sticky top-0 bg-black p-3 z-50 shadow-xl border-b border-green-400">
-        <nav class="flex flex-wrap justify-center gap-2 sm:gap-4 text-sm sm:text-base">
-            <a href="home.html" class="px-3 py-1 rounded transition">HOME</a>
-            <a href="dashboard.html" class="px-3 py-1 rounded transition">DASHBOARD</a>
-            <a href="mission.html" class="px-3 py-1 rounded transition">MISSION</a>
-            <a href="team.html" class="px-3 py-1 rounded transition">TEAM</a>
-            <a href="partner.html" class="px-3 py-1 rounded transition">PARTNER SUC</a>
-            <a href="contact.html" class="px-3 py-1 rounded transition">CONTACT</a>
-        </nav>
-    </header>
+  <!-- Header -->
+  <header class="sticky top-0 bg-white p-3 z-50 shadow-md border-b border-blue-400">
+    <nav class="flex flex-wrap justify-center gap-2 sm:gap-4 text-sm sm:text-base">
+      <a href="home.html" class="px-3 py-1 rounded transition">HOME</a>
+      <a href="dashboard.html" class="px-3 py-1 rounded transition">DASHBOARD</a>
+      <a href="mission.html" class="px-3 py-1 rounded transition">MISSION</a>
+      <a href="team.html" class="px-3 py-1 rounded transition">TEAM</a>
+      <a href="partner.html" class="px-3 py-1 rounded transition">PARTNER SUC</a>
+      <a href="contact.html" class="px-3 py-1 rounded transition">CONTACT</a>
+    </nav>
+  </header>
 
-    <!-- Main Content -->
-    <main class="bg-gradient-to-b from-black to-green-900 px-4 sm:px-6 py-16 min-h-screen">
-        <div class="text-center mb-12">
-            <h1 class="text-2xl sm:text-3xl font-bold text-green-300">Partner SUCs</h1>
-            <p class="text-green-200 text-sm mt-2">Our collaboration with other State Universities and Colleges</p>
-        </div>
+  <!-- Main Content -->
+  <main class="bg-gradient-to-b from-white via-blue-50 to-white px-4 sm:px-6 py-16 min-h-screen">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-blue-700 tracking-wide">Partner SUCs</h1>
+      <p class="text-blue-600 text-sm sm:text-base mt-2 max-w-xl mx-auto">
+        In collaboration with leading State Universities and Colleges (SUCs) to advance indoor air quality research and innovation.
+      </p>
+    </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
 
-            <!-- Example Partner Logos -->
-            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
-                <img src="images/u-1.png" alt="Partner 1 Logo" class="partner-logo" />
-            </div>
+      <!-- Partner Logos -->
+      <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+        <img src="images/u-1.png" alt="Partner 1 Logo" class="partner-logo" />
+      </div>
 
-            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
-                <img src="images/u-2.png" alt="Partner 2 Logo" class="partner-logo" />
-            </div>
+      <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+        <img src="images/u-2.png" alt="Partner 2 Logo" class="partner-logo" />
+      </div>
 
-            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
-                <img src="images/u-3.png" alt="Partner 3 Logo" class="partner-logo" />
-            </div>
+      <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+        <img src="images/u-3.png" alt="Partner 3 Logo" class="partner-logo" />
+      </div>
 
-            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
-                <img src="images/u-4.png" alt="Partner 4 Logo" class="partner-logo" />
-            </div>
+      <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+        <img src="images/u-4.png" alt="Partner 4 Logo" class="partner-logo" />
+      </div>
 
-            <!-- Add more partner logos as needed -->
-            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
-                <img src="images/u-5.png" alt="Partner 5 Logo" class="partner-logo" />
-            </div>
+      <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+        <img src="images/u-5.png" alt="Partner 5 Logo" class="partner-logo" />
+      </div>
 
-            <div class="partner-card rounded-xl p-4 flex items-center justify-center">
-                <img src="images/u-6.png" alt="Partner 6 Logo" class="partner-logo" />
-            </div>
+      <div class="partner-card rounded-xl p-4 flex items-center justify-center">
+        <img src="images/u-6.png" alt="Partner 6 Logo" class="partner-logo" />
+      </div>
 
-        </div>
-    </main>
+      <!-- Add more partner cards as needed -->
 
-    <!-- Footer -->
-    <footer class="bg-black border-t border-green-400 py-4 text-center text-green-200 text-sm">
-        &copy; 2025 ISAT U Ambiance Project. All rights reserved.
-    </footer>
+    </div>
+  </main>
+  <!-- Footer -->
+  <footer class="bg-blue-800 text-white text-center py-4 text-sm">
+    &copy; 2025 ISAT U Ambiance Project. All rights reserved.
+  </footer>
 
 </body>
 

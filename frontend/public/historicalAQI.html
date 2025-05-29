@@ -8,11 +8,11 @@
 </head>
 <body class="bg-green-50 p-6 font-sans">
   <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
-    <h1 class="text-2xl font-bold mb-6 text-green-800">AQI Line Graph</h1>
+    <h1 class="text-2xl font-bold mb-6 text-blue-700">AQI Line Graph</h1>
 
     <!-- Station Dropdown -->
     <div class="mb-4">
-      <label class="block text-sm font-semibold text-green-700" for="stationSelect">Select Station:</label>
+      <label class="block text-sm font-semibold text-blue-700" for="stationSelect">Select Station:</label>
       <select id="stationSelect" class="border p-2 rounded w-full max-w-xs">
         <option value="">Loading stations...</option>
       </select>
@@ -20,7 +20,7 @@
 
     <!-- Date Dropdown -->
     <div class="mb-6">
-      <label class="block text-sm font-semibold text-green-700" for="dateSelect">Select Date:</label>
+      <label class="block text-sm font-semibold text-blue-700" for="dateSelect">Select Date:</label>
       <select id="dateSelect" class="border p-2 rounded w-full max-w-xs" disabled>
         <option value="">Select station first</option>
       </select>
@@ -30,11 +30,11 @@
     <canvas id="aqiChart" height="100"></canvas>
 
     <div class="mt-4">
-      <button id="downloadBtn" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded">
+      <button id="downloadBtn" class="bg-blue-700 hover:bg-green-800 text-white px-4 py-2 rounded">
         Download Chart
       </button>
 
-      <button id="downloadCsvBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2">
+      <button id="downloadCsvBtn" class="bg-blue-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2">
         Download CSV
       </button>
     </div>
@@ -101,9 +101,9 @@
           datasets: [{
             label: `AQI on ${selectedDate} (${stationID})`,
             data: aqiValues,
-            borderColor: '#5D8736',
+            borderColor: '#4292c6',
             backgroundColor: 'rgba(129, 199, 132, 0.2)',
-            pointBackgroundColor: '#A9C46C',
+            pointBackgroundColor: '#4292c6',
             fill: true,
             tension: 0.3
           }]
