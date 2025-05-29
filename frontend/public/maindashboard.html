@@ -3,359 +3,300 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LATEST STATION DATA</title>
-  <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/justgage@1.4.0/justgage.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Modern Air Quality Dashboard</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script> 
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.4.0/justgage.min.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script> 
+
+
+  
+
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.3); border-radius: 10px; }
+
+    /* Glass Card */
+    .glass-card {
+      backdrop-filter: blur(15px);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Sidebar Gradient */
+    .sidebar-glass {
+      backdrop-filter: blur(15px);
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6); 
+    }
+
+    /* Level Colors */
+    .level-good { background-color: #D1F1D1; }
+    .level-moderate { background-color: #FFE082; }
+    .level-unhealthy { background-color: #FFA726; }
+    .level-hazardous { background-color: #EF5350; }
+
+    /* Hover Scale Animation */
+    .hover-scale:hover {
+      transform: scale(1.02);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 1rem;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .station-card {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      margin: 0.5rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .station-card:hover {
+      background-color: #f0f8ff;
+    }
+  </style>
 </head>
-<body>
-  <div class="min-h-screen bg-[#f0f9ff] text-blue-900 p-6">
-  <!-- Station Selector -->
-  <div class="mb-4">
-    <label for="stationSelect" class="text-xl font-semibold text-blue-900 block mb-2">Select Station:</label>
-    <select id="stationSelect" class="w-full px-4 py-2 border border-blue-300 rounded-lg text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50">
-      <option value="">--SELECT STATION--</option>
-    </select>
-    <p id="lastUpdated" class="text-sm text-blue-600 mt-2"></p>
+<body class="bg-gray-100 min-h-screen">
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 sidebar-glass text-white z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+  <div class="p-4 border-b border-white/20">
+    <h1 class="text-xl font-bold">AirWatch</h1>
+    <p class="text-sm text-white/70">Quality Monitor</p>
   </div>
-
-  <div class="flex-row w-full h-1/3">
-    <div class="flex flex-row md:flex-row gap-4 justify-center items-start mb-2">
-      <div class="bg-white shadow-lg rounded-xl h-40 w-full md:w-1/4 border border-blue-200">
-        <div class="flex flex-row text-m text-blue-600 mt-2 mb-0 justify-center">AQI</div>
-        <div id="weightedContainer" class="grid grid-cols-1 -mt-8"></div>
-      </div>
-      <div class="bg-white shadow-lg rounded-xl p-4 h-fit w-full md:w-2/3 border border-blue-200">
-        <canvas id="aqiChart" width="400" height="130"></canvas>
-      </div>
-    </div>
-  </div> 
-
-  <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
-    <div class="shadow-md border bg-white border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="tvocGauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">TVOC</p>
-      <p id="tvocStatus" class="text-blue-900 font-medium">Status</p>
-    </div>
-    <div class="bg-white shadow-md border border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="eCO2Gauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">eCO2</p>
-      <p id="eCO2Status" class="text-blue-900 font-medium">Status</p>      
-    </div>
-    <div class="bg-white shadow-md border border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="temperatureGauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">Temperature</p>
-      <p id="temperatureStatus" class="text-blue-900 font-medium">Status</p>
-    </div>
-    <div class="bg-white shadow-md border border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="humidityGauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">Humidity</p>
-      <p id="humidityStatus" class="text-blue-900 font-medium">Status</p>
-    </div>
-    <div class="bg-white shadow-md border border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="dustGauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">Dust</p>
-      <p id="dustDensityStatus" class="text-blue-900 font-medium">Status</p>
-    </div>
+  <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+    <a href="maindashboard.html" class="block px-3 py-2 rounded hover:bg-blue-800 text-white nav-link">
+      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/grid.svg" class="nav-icon inline mr-2" alt="Dashboard" />
+      Dashboard
+    </a>
+    <a href="home.html" class="block px-3 py-2 rounded hover:bg-blue-800 text-white nav-link">
+      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/home.svg" class="nav-icon inline mr-2" alt="Home" />
+      Home
+    </a>
+   <div class="space-y-1">
+  <button id="parametersToggle" class="w-full text-left px-3 py-2 rounded hover:bg-blue-800 flex justify-between items-center nav-link">
+    <span class="flex items-center">
+      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/sliders.svg" class="w-5 h-5 mr-2" alt="Parameters" />
+      Parameters
+    </span>
+    <i id="dropdownArrow" class="fas fa-chevron-down"></i>
+  </button>
+  <div id="parametersDropdown" class="hidden ml-6 space-y-1">
+    <a href="parameters/tvoc.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
+<img src="https://cdn.jsdelivr.net/npm/lucide-static@0.292.0/icons/test-tube.svg" class="w-5 h-5 mr-2" alt="TVOC" />
+      TVOC
+    </a>
+    <a href="parameters/eco2.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
+      <img src="https://cdn.jsdelivr.net/npm/@tabler/icons@2.18.0/icons/cloud.svg" class="w-5 h-5 mr-2" alt="eCO2" />
+      eCO2
+    </a>
+    <a href="parameters/temperature.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
+      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/thermometer.svg" class="w-5 h-5 mr-2" alt="Temperature" />
+      Temperature
+    </a>
+    <a href="parameters/humidity.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
+      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/droplet.svg" class="w-5 h-5 mr-2" alt="Humidity" />
+      Humidity
+    </a>
+    <a href="parameters/dustDensity.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
+      <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/air-filter.svg" class="w-5 h-5 mr-2" alt="Dust Density" />
+      Dust Density
+    </a>
   </div>
-
-  <div id="dataContainer" class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto mb-6"></div>
 </div>
+    <a href="history.html" class="block px-3 py-2 rounded hover:bg-blue-800 text-white nav-link">
+      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/clock.svg" class="nav-icon inline mr-2" alt="History" />
+      History
+    </a>
+    <a href="historicalAQI.html" class="block px-3 py-2 rounded hover:bg-blue-800 text-white nav-link">
+      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/wind.svg" class="nav-icon inline mr-2" alt="Air Quality" />
+      Air Quality Index
+    </a>
+  </nav>
+</aside>
 
-  <script>
-    let gauges = {};
-    const weights = { tvoc: 0.2, eCO2: 0.2, humidity: 0.15, temperature: 0.15, dustDensity: 0.3 };
-    const maxValues = { tvoc: 3000, eCO2: 3000, humidity: 100, temperature: 50, dustDensity: 200 };
 
-    const thresholds = {
-      tvoc: [250, 500, 1000, 2000],
-      eCO2: [400, 800, 1200, 2000],
-      temperature: [18, 24, 30, 36],
-      humidity: [30, 50, 70, 85],
-      dustDensity: [35, 70, 110, 160]
-    };
+<!-- HAMBURGER BUTTON -->
+<button id="hamburger" class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded shadow-md">
+  <i class="fas fa-bars"></i>
+</button>
 
-    function initGauges() {
-      gauges.tvoc = new JustGage({ id: "tvocGauge", value: 0, min: 0, max: 3000 });
-      gauges.eCO2 = new JustGage({ id: "eCO2Gauge", value: 0, min: 0, max: 3000 });
-      gauges.temperature = new JustGage({ id: "temperatureGauge", value: 0, min: 0, max: 50 });
-      gauges.humidity = new JustGage({ id: "humidityGauge", value: 0, min: 0, max: 100 });
-      gauges.dust = new JustGage({ id: "dustGauge", value: 0, min: 0, max: 200 });
-    }
+<!-- MAIN CONTENT -->
+<main class="lg:ml-64 p-6 min-h-screen transition-all duration-300">
+  <header class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Air Quality Dashboard</h1>
+    <p class="text-gray-600">Real-time monitoring of environmental parameters</p>
+  </header>
 
-    function getLevel(val, th) {
-      if (val <= th[0]) return "Good";
-      if (val <= th[1]) return "Good";
-      if (val <= th[2]) return "Moderate";
-      if (val <= th[3]) return "Unhealthy";
-      return "Unhealthy";
-    }
+  <!-- STATION SELECTOR -->
+  <section class="mb-6 glass-card p-4 rounded-lg shadow">
+    <button id="openStationModal" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition mb-2">
+      <i class="fas fa-broadcast-tower mr-2"></i>Select Monitoring Station
+    </button>
+    <p id="lastUpdated" class="mt-2 text-sm text-gray-500">Last updated: --</p>
+  </section>
 
-    function updateStatus(data) {
-      for (const key in thresholds) {
-        if (data[key] !== undefined) {
-          const level = getLevel(data[key], thresholds[key]);
-          const statusEl = document.getElementById(`${key}Status`);
-          if (statusEl) {
-            statusEl.textContent = level; // Simplified status output
-          }
-        }
-      }
-    }
+  <!-- SELECTED STATION CARD -->
+  <div id="selectedStationCard" class="mb-6 hidden glass-card p-4 rounded-lg shadow-md flex items-center space-x-4">
+    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+      <i class="fas fa-broadcast-tower text-blue-600 text-xl"></i>
+    </div>
+    <div>
+      <p class="text-sm text-gray-600">Selected Station</p>
+      <p id="selectedStationText" class="text-lg font-medium">None selected</p>
+    </div>
+  </div>
 
-    function updateValues(data) {
-      const { tvoc, eCO2, temperature, humidity, dustDensity } = data;
-      if (tvoc !== undefined) gauges.tvoc.refresh(tvoc);
-      if (eCO2 !== undefined) gauges.eCO2.refresh(eCO2);
-      if (temperature !== undefined) gauges.temperature.refresh(temperature);
-      if (humidity !== undefined) gauges.humidity.refresh(humidity);
-      if (dustDensity !== undefined) gauges.dust.refresh(dustDensity);
-    }
+  <!-- AQI CHART -->
+<section class="mb-6 glass-card p-6 rounded-lg shadow">
+  <canvas id="aqiChart" height="100"></canvas>
+</section>
 
-    function computedNormalizedWeightedValues(data, weights, maxValues) {
-      const weightedData = {};
-      for (const [key, value] of Object.entries(data)) {
-        if (weights[key] !== undefined && maxValues[key] !== undefined) {
-          const normalized = Math.min(value / maxValues[key], 1);
-          weightedData[key] = { weightedValue: normalized * weights[key] };
-        }
-      }
-      return weightedData;
-    }
+  <!-- GAUGES SECTION -->
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <div class="glass-card p-4 rounded-lg text-center hover-scale">
+      <div id="tvocGauge" style="height: 160px;"></div>
+      <h3 class="font-semibold mt-2">TVOC</h3>
+      <p id="tvocStatus" class="mt-1 text-sm"></p>
+    </div>
+    <div class="glass-card p-4 rounded-lg text-center hover-scale">
+      <div id="eCO2Gauge" style="height: 160px;"></div>
+      <h3 class="font-semibold mt-2">eCO2</h3>
+      <p id="eCO2Status" class="mt-1 text-sm"></p>
+    </div>
+    <div class="glass-card p-4 rounded-lg text-center hover-scale">
+      <div id="temperatureGauge" style="height: 160px;"></div>
+      <h3 class="font-semibold mt-2">Temperature</h3>
+      <p id="temperatureStatus" class="mt-1 text-sm"></p>
+    </div>
+    <div class="glass-card p-4 rounded-lg text-center hover-scale">
+      <div id="humidityGauge" style="height: 160px;"></div>
+      <h3 class="font-semibold mt-2">Humidity</h3>
+      <p id="humidityStatus" class="mt-1 text-sm"></p>
+    </div>
+    <div class="glass-card p-4 rounded-lg text-center hover-scale">
+      <div id="dustGauge" style="height: 160px;"></div>
+      <h3 class="font-semibold mt-2">Dust Density</h3>
+      <p id="dustDensityStatus" class="mt-1 text-sm"></p>
+    </div>
+  </section>
 
-    function computeCompositeScore(weightedData) {
-      return Object.values(weightedData).reduce((sum, item) => sum + item.weightedValue, 0) * 100;
-    }
-
-    function displayTotalScore(score) {
-  const weightedContainer = document.getElementById('weightedContainer');
-  weightedContainer.innerHTML = `
-    <div class="flex flex-col items-center">
+  <!-- COMPOSITE AQI SCORE -->
+  <section class="mb-6 glass-card p-6 rounded-lg shadow flex flex-col items-center">
+    <h2 class="text-xl font-semibold mb-4">Overall Air Quality Index</h2>
+    <div id="weightedContainer" class="my-4">
       <div id="totalGauge" style="height: 200px; width: 200px;"></div>
     </div>
-  `;
+    <div id="aqiStatus" class="mt-4 px-4 py-2 rounded-full text-sm font-medium">
+      Calculating...
+    </div>
+  </section>
 
-  let aqiChart;
+  <!-- AQI CHART -->
+  <section class="mb-6 glass-card p-6 rounded-lg shadow">
+    <canvas id="aqiChart" height="100"></canvas>
+  </section>
 
-  function renderAQILineChart(labels, scores) {
-    const ctx = document.getElementById('aqiLineChart').getContext('2d');
-    if (aqiChart) {
-      aqiChart.destroy(); // Clear previous chart
-    }
+  <!-- DYNAMIC DATA CARDS -->
+  <section id="dataContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></section>
+</main>
 
-    aqiChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Hourly AQI (%)',
-          data: scores,
-          fill: false,
-          borderColor: '#5D8736',
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            title: { display: true, text: 'Time' }
-          },
-          y: {
-            title: { display: true, text: 'AQI Score (%)' },
-            min: 0,
-            max: 100
-          }
-        }
-      }
-    });
-  }
+<!-- MODAL FOR STATION SELECTION -->
+<div id="stationModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Select Monitoring Station</h2>
+      <button id="closeStationModal" class="text-red-500"><i class="fas fa-times text-xl"></i></button>
+    </div>
+    <div id="stationCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+  </div>
+</div>
 
-  let chartInstance = null; // For reusing/destroying the chart
+<!-- Load dashboard.js -->
+<script src="./scripts//dashboard.js"></script>
 
-document.getElementById('stationSelect').addEventListener('change', function () {
-  const id = this.value;
-  if (!id) return;
+<!-- Inline Scripts for UI Interactivity -->
+<script>
+  // Page-specific JS
 
-  Promise.all([
-    fetch(`https://isatuairquality.onrender.com/stations/${id}`).then(res => res.json()),
-    fetch(`https://isatuairquality.onrender.com/aqi/stations/${id}`).then(res => res.json())
-  ])
-    .then(([data, aqiData]) => {
-      if (!data || data.length === 0 || !aqiData || aqiData.length === 0) return;
+  window.onload = () => {
+    initGauges();
+    loadStations();
+    fetchLatestData();
+  };
 
-      const latest = data[0];
-
-      document.getElementById('dataContainer').innerHTML = '';
-      document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
-
-      for (const [key, value] of Object.entries(latest)) {
-        if (key === 'transID') continue;
-        const div = document.createElement('div');
-        div.className = 'bg-white shadow p-4 rounded text-sm';
-        div.innerHTML = `<strong>${key}</strong><br>${value}`;
-        document.getElementById('dataContainer').appendChild(div);
-      }
-
-      updateValues(latest);
-      updateStatus(latest);
-
-      // ✅ Get the most recent full date (YYYY-MM-DD) from all aqiData
-      const latestDate = aqiData
-        .map(entry => new Date(entry.date_time).toISOString().split('T')[0])
-        .sort()
-        .reverse()[0];
-
-      // ✅ Filter all entries from that latest date
-      const filteredAQIData = aqiData.filter(entry => {
-        const entryDate = new Date(entry.date_time).toISOString().split('T')[0];
-        return entryDate === latestDate;
-      });
-
-      // ✅ Display the last AQI value from that day in gauge
-      const lastEntry = filteredAQIData[filteredAQIData.length - 1];
-      if (lastEntry && lastEntry.aqi !== undefined) {
-        displayTotalScore(lastEntry.aqi);
-      }
-
-      // === AQI Line Chart Rendering === (Your original logic)
-      if (Array.isArray(filteredAQIData)) {
-        const labels = filteredAQIData.map(entry => new Date(entry.date_time).toISOString().substring(11, 19));
-        const aqiValues = filteredAQIData.map(entry => entry.aqi);
-        const ctx = document.getElementById('aqiChart').getContext('2d');
-        if (chartInstance) {
-          chartInstance.destroy();
-        }
-
-        chartInstance = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'AQI Over Time',
-              data: aqiValues,
-              borderColor: 'rgba(75, 192, 192, 1)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              fill: true,
-              tension: 0.3,
-              pointRadius: 3,
-              pointHoverRadius: 5,
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: 'Time'
-                }
-              },
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'AQI'
-                }
-              }
-            }
-          }
-        });
-      }
-    })
-    .catch(err => console.error("Error fetching data:", err));
-});
-
-
-  // Always reinitialize the gauge after updating the DOM
-  gauges.total = new JustGage({
-    id: "totalGauge",
-    value: score,
-    min: 0,
-    max: 100,
-    label: "%",
-    levelColors: ["#A9C46C", "#809D3C", "#5D8736", "#D97706", "#DC2626"],
-    customSectors: [
-      { color: "#A9C46C", lo: 0, hi: 20 },
-      { color: "#809D3C", lo: 21, hi: 40 },
-      { color: "#5D8736", lo: 41, hi: 60 },
-      { color: "#D97706", lo: 61, hi: 80 },
-      { color: "#DC2626", lo: 81, hi: 100 }
-    ]
+  // Toggle Parameters Dropdown
+  document.getElementById('parametersToggle').addEventListener('click', () => {
+    const dropdown = document.getElementById('parametersDropdown');
+    const arrow = document.getElementById('dropdownArrow');
+    dropdown.classList.toggle('hidden');
+    arrow.classList.toggle('rotate-180');
   });
-}
 
+  // Modal Controls
+  document.getElementById('openStationModal').addEventListener('click', () => {
+    document.getElementById('stationModal').classList.remove('hidden');
+  });
 
-    function fetchLatestData() {
-      fetch('https://isatuairquality.onrender.com/latest')
-        .then(res => res.json())
-        .then(data => {
-          if (!data || Object.keys(data).length === 0) return;
-          document.getElementById('dataContainer').innerHTML = '';
-          document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
+  document.getElementById('closeStationModal').addEventListener('click', () => {
+    document.getElementById('stationModal').classList.add('hidden');
+  });
+</script>
 
-          for (const [key, value] of Object.entries(data)) {
-            if (key === 'transID') continue;
-            const div = document.createElement('div');
-            div.className = 'bg-white shadow p-4 rounded text-sm';
-            div.innerHTML = `<strong>${key}</strong><br>${value}`;
-            document.getElementById('dataContainer').appendChild(div);
-          }
+<!-- Sidebar Toggle Logic -->
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const hamburger = document.getElementById('hamburger');
 
-          const weightedData = computedNormalizedWeightedValues(data, weights, maxValues);
-          const totalScore = computeCompositeScore(weightedData);
-          displayTotalScore(totalScore);
-          updateValues(data);
-          updateStatus(data);
-        });
+  hamburger.addEventListener('click', () => {
+    sidebar.classList.remove('-translate-x-full');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (
+      window.innerWidth < 768 &&
+      !sidebar.contains(e.target) &&
+      !hamburger.contains(e.target)
+    ) {
+      sidebar.classList.add('-translate-x-full');
     }
+  });
+</script>
 
-    document.getElementById('stationSelect').addEventListener('change', function () {
-      const id = this.value;
-      if (!id) return;
-
-      fetch(`https://isatuairquality.onrender.com/stations/${id}`)
-        .then(res => res.json())
-        .then(data => {
-          if (!data || data.length === 0) return;
-          const latest = data[0];
-
-          document.getElementById('dataContainer').innerHTML = '';
-          document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
-
-          for (const [key, value] of Object.entries(latest)) {
-            if (key === 'transID') continue;
-            const div = document.createElement('div');
-            div.className = 'bg-white shadow p-4 rounded text-sm';
-            div.innerHTML = `<strong>${key}</strong><br>${value}`;
-            document.getElementById('dataContainer').appendChild(div);
-          }
-
-          const weightedData = computedNormalizedWeightedValues(latest, weights, maxValues);
-          const totalScore = computeCompositeScore(weightedData);
-          displayTotalScore(totalScore);
-          updateValues(latest);
-          updateStatus(latest);
-        });
-    });
-
-    fetch('https://isatuairquality.onrender.com/stations')
-      .then(res => res.json())
-      .then(stations => {
-        const select = document.getElementById('stationSelect');
-        stations.forEach(station => {
-          const opt = document.createElement('option');
-          opt.value = station.stationID;
-          opt.textContent = station.stationID;
-          select.appendChild(opt);
-        });
-      });
-
-    window.onload = () => {
-      initGauges();
-      fetchLatestData();
-    };
-  </script>
 </body>
 </html>
