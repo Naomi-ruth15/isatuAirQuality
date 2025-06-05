@@ -1,117 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ambiance Project - Mission</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact - Ambiance Project</title>
 
-        .nav-link {
-            @apply transition duration-300 ease-in-out hover:text-yellow-300;
-        }
-    </style>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>   
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-link {
+      transition: color 300ms ease-in-out;
+    }
+
+    /* Scroll Animation */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Hover Effects */
+    .hover-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
-
 <body class="bg-gradient-to-br from-green-100 via-blue-100 to-green-200 min-h-screen">
 
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-green-400 via-blue-400 to-green-500 shadow-lg py-4 sticky top-0 z-50">
-        <nav class="max-w-7xl mx-auto flex justify-between items-center px-8 text-lg font-semibold text-white">
-            <div class="flex items-center gap-3">
-                <img src="logo1.png" alt="Ambiance Project Logo" class="h-14 w-auto" />
-            </div>
-            <div class="flex items-center gap-8">
-                <a href="home.html" class="nav-link">Home</a>
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
-                <a href="mission.html" class="nav-link">Mission</a>
-                <a href="team.html" class="nav-link">Team</a>
-                <a href="partner.html" class="nav-link">Partner SUC</a>
-                <a href="contact.html" class="nav-link">Contact</a>
-            </div>
-        </nav>
-    </header>
+  <!-- Header (Matches home.html) -->
+  <header class="bg-gradient-to-r from-green-400 via-blue-400 to-green-500 shadow-lg py-4 sticky top-0 z-50">
+    <nav class="max-w-7xl mx-auto flex justify-between items-center px-8 text-lg font-semibold text-white">
+      <div class="flex items-center gap-3">
+        <img src="logo1.png" alt="Ambiance Project Logo" class="h-14 w-auto" />
+      </div>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="home.html" class="nav-link">Home</a>
+        <a href="maindashboard.html" class="nav-link">Dashboard</a>
+        <a href="mission.html" class="nav-link">Mission</a>
+        <a href="team.html" class="nav-link">Team</a>
+        <a href="partner.html" class="nav-link">Partner SUC</a>
+        <a href="contact.html" class="nav-link underline decoration-2 underline-offset-4">Contact</a>
+      </div>
+    </nav>
+  </header>
 
-    <!-- Hero Banner -->
-    <section class="relative w-full h-[480px] md:h-[520px] overflow-hidden">
-        <img src=".jpg" alt="Mission" class="absolute w-full h-full object-cover" />
-    </section>
+  <!-- Hero Banner -->
+  <section class="relative w-full h-[480px] md:h-[520px] overflow-hidden fade-in">
+    <img src=".jpg" alt="Contact" class="absolute w-full h-full object-cover" />
+  </section>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 lg:grid-cols-4 gap-10">
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 lg:grid-cols-4 gap-10">
 
-        <!-- Sidebar -->
-        <aside class="lg:col-span-1 bg-white rounded-2xl shadow-2xl p-6 space-y-4 h-fit sticky top-24">
-            <h2 class="text-2xl font-semibold text-blue-700 mb-6">Explore Sections</h2>
-            <button onclick="showContent('Mission')"
-                class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition">🌍 Mission</button>
-            <button onclick="showContent('Team')"
-                class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition">👥 Team</button>
-            <button onclick="showContent('Partners')"
-                class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition">🤝 Partners</button>
-        </aside>
+    <!-- Sidebar -->
+    <aside class="lg:col-span-1 bg-white rounded-2xl shadow-2xl p-6 space-y-4 h-fit sticky top-24 fade-in">
+      <h2 class="text-2xl font-semibold text-blue-700 mb-6">Explore Sections</h2>
+      <button onclick="showContent('Mission')"
+        class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition hover-lift">🌍 Mission</button>
+      <button onclick="showContent('Team')"
+        class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition hover-lift">👥 Team</button>
+      <button onclick="showContent('Partners')"
+        class="w-full text-left px-4 py-2 rounded-lg hover:bg-blue-100 transition hover-lift">🤝 Partners</button>
+    </aside>
 
-        <!-- Content Area -->
-        <main class="lg:col-span-3 space-y-6">
-            <section id="dynamic-section"
-                class="bg-white rounded-3xl shadow-2xl p-10 transition-all duration-300 ease-in-out">
-                <h2 id="content-title" class="text-4xl font-semibold text-blue-700 mb-4">Mission</h2>
-                <p id="content-text" class="text-gray-700 text-lg leading-relaxed">
-                    Our mission is to improve indoor environmental quality and integrate sustainable practices into
-                    buildings.
-                </p>
-                <div id="image-container" class="mt-8 flex justify-center">
-                    <img src="mission-image.jpg" alt="Mission Image"
-                        class="rounded-xl shadow-md max-w-full w-[420px]" />
-                </div>
-            </section>
-        </main>
-    </div>
+    <!-- Content Area -->
+    <main class="lg:col-span-3 space-y-6">
+      <section id="dynamic-section"
+        class="bg-white rounded-3xl shadow-2xl p-10 transition-all duration-300 ease-in-out fade-in">
+        <h2 id="content-title" class="text-4xl font-semibold text-blue-700 mb-4">Mission</h2>
+        <p id="content-text" class="text-gray-700 text-lg leading-relaxed">
+          Our mission is to improve indoor environmental quality and integrate sustainable practices into buildings.
+        </p>
+        <div id="image-container" class="mt-8 flex justify-center">
+          <img src="mission-image.jpg" alt="Mission Image"
+            class="rounded-xl shadow-md max-w-full w-[420px]" />
+        </div>
+      </section>
+    </main>
+  </div>
 
-    <!-- Footer -->
-    <footer class="bg-gradient-to-r from-green-400 via-blue-400 to-green-500 text-white text-center py-6 text-sm mt-10">
-        ambiance@g.batstate-u.edu.ph | Alangilan, Batangas City | © 2025
-    </footer>
+  <!-- Footer -->
+  <footer class="bg-gradient-to-r from-green-400 via-blue-400 to-green-500 text-white text-center py-6 text-sm mt-10">
+    ambiance@g.batstate-u.edu.ph | Alangilan, Batangas City | © 2025
+  </footer>
 
-    <!-- Script -->
-    <script>
-        const contents = {
-            Mission: {
-                title: "Mission",
-                text: "Our mission is to improve indoor environmental quality and integrate sustainable practices into buildings.",
-                image: "img/mission.png",
-                color: "bg-white"
-            },
-            Team: {
-                title: "Team",
-                text: "Our team is composed of experts in the field of environmental science, architecture, and technology, working together to create impactful solutions.",
-                image: "img/team.png",
-                color: "bg-blue-50"
-            },
-            Partners: {
-                title: "Partners",
-                text: "We collaborate with several partner institutions and organizations to advance research and development in environmental sustainability.",
-                image: "img/partners.png",
-                color: "bg-green-50"
-            }
-        };
+  <!-- Script -->
+  <script>
+    const contents = {
+      Mission: {
+        title: "Mission",
+        text: "Our mission is to improve indoor environmental quality and integrate sustainable practices into buildings.",
+        image: "img/mission.png",
+        color: "bg-white"
+      },
+      Team: {
+        title: "Team",
+        text: "Our team is composed of experts in the field of environmental science, architecture, and technology, working together to create impactful solutions.",
+        image: "img/team.png",
+        color: "bg-blue-50"
+      },
+      Partners: {
+        title: "Partners",
+        text: "We collaborate with several partner institutions and organizations to advance research and development in environmental sustainability.",
+        image: "img/partners.png",
+        color: "bg-green-50"
+      }
+    };
 
-        function showContent(key) {
-            const section = document.getElementById("dynamic-section");
-            section.className = `bg-white rounded-3xl shadow-2xl p-10 transition-all duration-300 ease-in-out ${contents[key].color}`;
-            document.getElementById("content-title").innerText = contents[key].title;
-            document.getElementById("content-text").innerText = contents[key].text;
-            document.getElementById("image-container").innerHTML =
-                `<img src="${contents[key].image}" alt="${contents[key].title} Image" class="rounded-xl shadow-md max-w-full w-[420px]" />`;
-        }
-    </script>
+    function showContent(key) {
+      const section = document.getElementById("dynamic-section");
+      section.className = `bg-white rounded-3xl shadow-2xl p-10 transition-all duration-300 ease-in-out ${contents[key].color}`;
+      document.getElementById("content-title").innerText = contents[key].title;
+      document.getElementById("content-text").innerText = contents[key].text;
+      document.getElementById("image-container").innerHTML =
+        `<img src="${contents[key].image}" alt="${contents[key].title} Image" class="rounded-xl shadow-md max-w-full w-[420px]" />`;
+    }
 
+    // Scroll Animation Logic
+    const animateOnScroll = () => {
+      const faders = document.querySelectorAll(".fade-in");
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          } else {
+            entry.target.classList.remove("visible"); // Optional: re-animate on scroll out
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px"
+      });
+
+      faders.forEach(fader => {
+        observer.observe(fader);
+      });
+    };
+
+    window.addEventListener("load", animateOnScroll);
+    window.addEventListener("scroll", animateOnScroll);
+  </script>
 </body>
-
 </html>

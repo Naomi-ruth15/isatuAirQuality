@@ -3,71 +3,332 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LATEST STATION DATA</title>
-  <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/justgage@1.4.0/justgage.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Air Quality Monitoring System</title>
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>  
+  <script src="https://cdn.jsdelivr.net/npm/justgage@1.4.0/justgage.min.js"></script>  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
+  <script src="https://cdn.tailwindcss.com"></script>  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      font-family: "Inter", sans-serif;
+    }
+    /* Glassmorphism */
+    .glass {
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }  
+    .hover-scale:hover {
+      transform: scale(1.02);
+      transition: transform 0.2s ease-in-out;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    @keyframes pulse-gentle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .status-online {
+      animation: pulse-gentle 2s infinite;
+    }
+    
+    /* Sidebar Transitions */
+    .sidebar {
+      transition: width 0.3s ease-in-out;
+    }
+    .sidebar.collapsed {
+      width: 4rem;
+    }
+    .sidebar.expanded {
+      width: 16rem;
+    }
+    
+    /* Navigation Text */
+    .nav-text {
+      transition: opacity 0.3s ease-in-out;
+    }
+    .sidebar.collapsed .nav-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+    .sidebar.expanded .nav-text {
+      opacity: 1;
+      width: auto;
+    }
+    
+    /* Dropdown Arrow */
+    .dropdown-arrow {
+      transition: opacity 0.3s ease-in-out;
+    }
+    .sidebar.collapsed .dropdown-arrow {
+      opacity: 0;
+    }
+    
+    /* Main Content Margin */
+    .main-content {
+      transition: margin-left 0.3s ease-in-out;
+    }
+    .main-content.sidebar-expanded {
+      margin-left: 16rem;
+    }
+    .main-content.sidebar-collapsed {
+      margin-left: 4rem;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 50;
+        transform: translateX(-100%);
+        width: 16rem !important;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0 !important;
+      }
+    }
+    
+    /* Tooltip for collapsed sidebar */
+    .tooltip {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 1000;
+    }
+    .nav-item:hover .tooltip {
+      opacity: 1;
+    }
+    .sidebar.expanded .tooltip {
+      display: none;
+    }
+  </style>
 </head>
-<body>
-  <div class="min-h-screen bg-[#f0f9ff] text-blue-900 p-6">
-  <!-- Station Selector -->
-  <div class="mb-4">
-    <label for="stationSelect" class="text-xl font-semibold text-blue-900 block mb-2">Select Station:</label>
-    <select id="stationSelect" class="w-full px-4 py-2 border border-blue-300 rounded-lg text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50">
-      <option value="">--SELECT STATION--</option>
-    </select>
-    <p id="lastUpdated" class="text-sm text-blue-600 mt-2"></p>
-  </div>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
 
-  <div class="flex-row w-full h-1/3">
-    <div class="flex flex-row md:flex-row gap-4 justify-center items-start mb-2">
-      <div class="bg-white shadow-lg rounded-xl h-40 w-full md:w-1/4 border border-blue-200">
-        <div class="flex flex-row text-m text-blue-600 mt-2 mb-0 justify-center">AQI</div>
-        <div id="weightedContainer" class="grid grid-cols-1 -mt-8"></div>
-      </div>
-      <div class="bg-white shadow-lg rounded-xl p-4 h-fit w-full md:w-2/3 border border-blue-200">
-        <canvas id="aqiChart" width="400" height="130"></canvas>
-      </div>
-    </div>
-  </div> 
-
-  <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
-    <div class="shadow-md border bg-white border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="tvocGauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">TVOC</p>
-      <p id="tvocStatus" class="text-blue-900 font-medium">Status</p>
-    </div>
-    <div class="bg-white shadow-md border border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="eCO2Gauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">eCO2</p>
-      <p id="eCO2Status" class="text-blue-900 font-medium">Status</p>      
-    </div>
-    <div class="bg-white shadow-md border border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="temperatureGauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">Temperature</p>
-      <p id="temperatureStatus" class="text-blue-900 font-medium">Status</p>
-    </div>
-    <div class="bg-white shadow-md border border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="humidityGauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">Humidity</p>
-      <p id="humidityStatus" class="text-blue-900 font-medium">Status</p>
-    </div>
-    <div class="bg-white shadow-md border border-blue-200 rounded-lg p-4 flex flex-col items-center">
-      <div id="dustGauge" style="height: 160px;"></div>
-      <p class="mt-2 text-blue-700 font-semibold">Dust</p>
-      <p id="dustDensityStatus" class="text-blue-900 font-medium">Status</p>
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white p-4 rounded-full shadow-lg flex flex-col items-center">
+      <i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i>
+      <span class="mt-2 text-sm font-medium text-gray-700">Loading station data...</span>
     </div>
   </div>
 
-  <div id="dataContainer" class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto mb-6"></div>
-</div>
+  <!-- Mobile Overlay -->
+  <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
 
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full bg-gradient-to-b from-blue-800 to-indigo-900 text-white sidebar expanded flex flex-col shadow-xl">
+    <!-- Header -->
+    <div class="p-4 border-b border-white/20 flex items-center">
+      <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-leaf text-white text-sm"></i>
+      </div>
+      <div class="nav-text ml-3 overflow-hidden">
+        <h1 class="text-lg font-bold">AirWatch</h1>
+        <p class="text-xs text-white/70">Quality Monitor</p>
+      </div>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+      <div class="nav-item relative">
+        <a href="maindashboard.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+          <i class="fas fa-th-large w-5 h-5 flex-shrink-0"></i>
+          <span class="nav-text ml-3">Dashboard</span>
+          <div class="tooltip">Dashboard</div>
+        </a>
+      </div>
+      
+      <div class="nav-item relative">
+        <a href="home.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+          <i class="fas fa-home w-5 h-5 flex-shrink-0"></i>
+          <span class="nav-text ml-3">Home</span>
+          <div class="tooltip">Home</div>
+        </a>
+      </div>
+
+      <!-- Parameters Dropdown -->
+      <div class="space-y-1">
+        <div class="nav-item relative">
+          <button id="parametersToggle" class="w-full flex items-center justify-between px-3 py-2 rounded hover:bg-blue-700 text-left">
+            <div class="flex items-center">
+              <i class="fas fa-sliders-h w-5 h-5 flex-shrink-0"></i>
+              <span class="nav-text ml-3">Parameters</span>
+            </div>
+            <i id="dropdownArrow" class="fas fa-chevron-down dropdown-arrow nav-text"></i>
+            <div class="tooltip">Parameters</div>
+          </button>
+        </div>
+        
+        <div id="parametersDropdown" class="hidden nav-text ml-4 space-y-1">
+          <a href="parameters/tvoc.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-vial w-4 h-4 mr-2"></i>
+            TVOC
+          </a>
+          <a href="parameters/eco2.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-cloud w-4 h-4 mr-2"></i>
+            eCO2
+          </a>
+          <a href="parameters/temperature.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-thermometer-half w-4 h-4 mr-2"></i>
+            Temperature
+          </a>
+          <a href="parameters/humidity.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-tint w-4 h-4 mr-2"></i>
+            Humidity
+          </a>
+          <a href="parameters/dustDensity.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-smog w-4 h-4 mr-2"></i>
+            Dust Density
+          </a>
+        </div>
+      </div>
+
+      <div class="nav-item relative">
+        <a href="history.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+          <i class="fas fa-history w-5 h-5 flex-shrink-0"></i>
+          <span class="nav-text ml-3">History</span>
+          <div class="tooltip">History</div>
+        </a>
+      </div>
+      
+      <div class="nav-item relative">
+        <a href="historicalAQI.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+          <i class="fas fa-wind w-5 h-5 flex-shrink-0"></i>
+          <span class="nav-text ml-3">Air Quality Index</span>
+          <div class="tooltip">Air Quality Index</div>
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main id="mainContent" class="main-content sidebar-expanded overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-30 p-4 mb-6">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <button id="sidebarToggle" class="text-xl mr-4 text-blue-600 hover:text-blue-800 transition-colors">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="text-xl font-semibold text-gray-800">Air Quality Monitoring</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <select id="stationSelect" class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">All Stations</option>
+          </select>
+          <span class="inline-flex items-center text-green-600">
+            <span class="status-dot status-online inline-block w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+            <span class="hidden sm:inline">Live Monitoring</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <div class="px-6 pb-6">
+      <!-- Welcome Section -->
+      <section class="mb-8">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 text-white">
+          <div class="flex flex-col md:flex-row justify-between items-center">
+            <div>
+              <h2 class="text-3xl font-bold">Real-time Air Quality</h2>
+              <p class="text-blue-100 mt-2">Monitor environmental conditions across all stations</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+              <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <i class="fas fa-leaf text-white text-2xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Gauges Grid -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">TVOC</h3>
+          <div id="tvocGauge" class="h-40"></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">eCO2</h3>
+          <div id="eCO2Gauge" class="h-40"></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">Temperature</h3>
+          <div id="temperatureGauge" class="h-40"></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">Humidity</h3>
+          <div id="humidityGauge" class="h-40"></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">Dust Density</h3>
+          <div id="dustGauge" class="h-40"></div>
+        </div>
+      </section>
+
+      <!-- Total AQI -->
+      <section class="mb-8">
+        <div class="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow">
+          <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Total Air Quality Index</h2>
+          <div class="flex justify-center">
+            <div id="totalGauge" class="h-64"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Data Cards -->
+      <section class="mb-8">
+        <div id="lastUpdated" class="text-sm text-green-600 mb-4 font-medium"></div>
+        <div id="dataContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"></div>
+      </section>
+
+      <!-- Chart Section -->
+      <section class="mb-8">
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-2xl font-bold text-gray-800">Today's AQI Trends</h3>
+              <p class="text-gray-600">Real-time air quality variations throughout the day</p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+              <i class="fas fa-chart-line text-white"></i>
+            </div>
+          </div>
+          <canvas id="aqiChart" width="400" height="100"></canvas>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="text-center text-sm text-gray-500 mt-8 py-4">
+        <p>&copy; 2025 AirWatch. Environmental monitoring made simple.</p>
+      </footer>
+    </div>
+  </main>
+
+  <!-- Scripts -->
   <script>
-    let gauges = {};
-    const weights = { tvoc: 0.2, eCO2: 0.2, humidity: 0.15, temperature: 0.15, dustDensity: 0.3 };
-    const maxValues = { tvoc: 3000, eCO2: 3000, humidity: 100, temperature: 50, dustDensity: 200 };
-
     const thresholds = {
       tvoc: [250, 500, 1000, 2000],
       eCO2: [400, 800, 1200, 2000],
@@ -75,6 +336,23 @@
       humidity: [30, 50, 70, 85],
       dustDensity: [35, 70, 110, 160]
     };
+    const weights = {
+      tvoc: 0.2,
+      eCO2: 0.2,
+      humidity: 0.15,
+      temperature: 0.15,
+      dustDensity: 0.3
+    };
+    const maxValues = {
+      tvoc: 3000,
+      eCO2: 3000,
+      humidity: 100,
+      temperature: 50,
+      dustDensity: 200
+    };
+    let gauges = {};
+    let chartInstance = null;
+    let isMobile = window.innerWidth < 768;
 
     function initGauges() {
       gauges.tvoc = new JustGage({ id: "tvocGauge", value: 0, min: 0, max: 3000 });
@@ -82,280 +360,228 @@
       gauges.temperature = new JustGage({ id: "temperatureGauge", value: 0, min: 0, max: 50 });
       gauges.humidity = new JustGage({ id: "humidityGauge", value: 0, min: 0, max: 100 });
       gauges.dust = new JustGage({ id: "dustGauge", value: 0, min: 0, max: 200 });
+      gauges.total = new JustGage({
+        id: "totalGauge",
+        value: 0,
+        min: 0,
+        max: 100,
+        label: "%",
+        levelColors: ["#A9C46C", "#809D3C", "#5D8736", "#D97706", "#DC2626"],
+        customSectors: [
+          { color: "#A9C46C", lo: 0, hi: 20 },
+          { color: "#809D3C", lo: 21, hi: 40 },
+          { color: "#5D8736", lo: 41, hi: 60 },
+          { color: "#D97706", lo: 61, hi: 80 },
+          { color: "#DC2626", lo: 81, hi: 100 }
+        ]
+      });
     }
 
-    function getLevel(val, th) {
-      if (val <= th[0]) return "Good";
-      if (val <= th[1]) return "Good";
-      if (val <= th[2]) return "Moderate";
-      if (val <= th[3]) return "Unhealthy";
-      return "Unhealthy";
-    }
-
-    function updateStatus(data) {
-      for (const key in thresholds) {
-        if (data[key] !== undefined) {
-          const level = getLevel(data[key], thresholds[key]);
-          const statusEl = document.getElementById(`${key}Status`);
-          if (statusEl) {
-            statusEl.textContent = level; // Simplified status output
-          }
-        }
+    function displayDataCards(data) {
+      const container = document.getElementById('dataContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      for (const [key, value] of Object.entries(data)) {
+        if (key === 'transID') continue;
+        const div = document.createElement('div');
+        div.className = 'bg-white shadow-lg rounded-lg p-4 hover:shadow-xl transition-shadow';
+        div.innerHTML = `<div class="text-sm text-gray-500 font-medium uppercase">${key}</div><div class="text-xl font-bold text-gray-800 mt-1">${value}</div>`;
+        container.appendChild(div);
       }
     }
 
     function updateValues(data) {
-      const { tvoc, eCO2, temperature, humidity, dustDensity } = data;
-      if (tvoc !== undefined) gauges.tvoc.refresh(tvoc);
-      if (eCO2 !== undefined) gauges.eCO2.refresh(eCO2);
-      if (temperature !== undefined) gauges.temperature.refresh(temperature);
-      if (humidity !== undefined) gauges.humidity.refresh(humidity);
-      if (dustDensity !== undefined) gauges.dust.refresh(dustDensity);
-    }
-
-    function computedNormalizedWeightedValues(data, weights, maxValues) {
-      const weightedData = {};
-      for (const [key, value] of Object.entries(data)) {
-        if (weights[key] !== undefined && maxValues[key] !== undefined) {
-          const normalized = Math.min(value / maxValues[key], 1);
-          weightedData[key] = { weightedValue: normalized * weights[key] };
+      for (const key in gauges) {
+        if (data[key] !== undefined && gauges[key]) {
+          gauges[key].refresh(data[key]);
         }
       }
-      return weightedData;
     }
 
-    function computeCompositeScore(weightedData) {
-      return Object.values(weightedData).reduce((sum, item) => sum + item.weightedValue, 0) * 100;
-    }
+    
 
-    function displayTotalScore(score) {
-  const weightedContainer = document.getElementById('weightedContainer');
-  weightedContainer.innerHTML = `
-    <div class="flex flex-col items-center">
-      <div id="totalGauge" style="height: 200px; width: 200px;"></div>
-    </div>
-  `;
-
-  let aqiChart;
-
-  function renderAQILineChart(labels, scores) {
-    const ctx = document.getElementById('aqiLineChart').getContext('2d');
-    if (aqiChart) {
-      aqiChart.destroy(); // Clear previous chart
-    }
-
-    aqiChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Hourly AQI (%)',
-          data: scores,
-          fill: false,
-          borderColor: '#5D8736',
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            title: { display: true, text: 'Time' }
-          },
-          y: {
-            title: { display: true, text: 'AQI Score (%)' },
-            min: 0,
-            max: 100
-          }
+    function computeAndDisplayAQI(data) {
+      let totalScore = 0;
+      for (const key in weights) {
+        const val = parseFloat(data[key]);
+        const max = maxValues[key];
+        if (!isNaN(val) && max > 0) {
+          totalScore += Math.min(1, val / max) * weights[key];
         }
       }
-    });
-  }
+      const scorePercent = Math.round(totalScore * 100);
+      if (gauges.total) gauges.total.refresh(scorePercent);
+    }
 
-  let chartInstance = null; // For reusing/destroying the chart
+    function fetchLatestData(stationId = '') {
+  const url = stationId
+    ? `https://isatuairquality.onrender.com/stations/${stationId}` 
+    : 'https://isatuairquality.onrender.com/latest';
 
-document.getElementById('stationSelect').addEventListener('change', function () {
-  const id = this.value;
-  if (!id) return;
-
-  Promise.all([
-    fetch(`https://isatuairquality.onrender.com/stations/${id}`).then(res => res.json()),
-    fetch(`https://isatuairquality.onrender.com/aqi/stations/${id}`).then(res => res.json())
-  ])
-    .then(([data, aqiData]) => {
-      if (!data || data.length === 0 || !aqiData || aqiData.length === 0) return;
-
-      const latest = data[0];
-
-      document.getElementById('dataContainer').innerHTML = '';
-      document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
-
-      for (const [key, value] of Object.entries(latest)) {
-        if (key === 'transID') continue;
-        const div = document.createElement('div');
-        div.className = 'bg-white shadow p-4 rounded text-sm';
-        div.innerHTML = `<strong>${key}</strong><br>${value}`;
-        document.getElementById('dataContainer').appendChild(div);
-      }
-
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const latest = Array.isArray(data) ? data[0] : data;
+      displayDataCards(latest);
       updateValues(latest);
-      updateStatus(latest);
+      computeAndDisplayAQI(latest);
+      fetchAQIData(stationId);
+    })
+    .catch(err => console.error("Error fetching station data:", err))
+    .finally(() => {
+      document.getElementById('loadingSpinner').classList.add('hidden');
+    });
+}
 
-      // ✅ Get the most recent full date (YYYY-MM-DD) from all aqiData
+function fetchAQIData(stationId = '') {
+  const url = stationId
+    ? `https://isatuairquality.onrender.com/aqi/stations/${stationId}`  
+    : 'https://isatuairquality.onrender.com/aqi/latest';
+
+  fetch(url)
+    .then(res => res.json())
+    .then(aqiData => {
+      if (!aqiData || aqiData.length === 0) return;
+
       const latestDate = aqiData
         .map(entry => new Date(entry.date_time).toISOString().split('T')[0])
         .sort()
         .reverse()[0];
 
-      // ✅ Filter all entries from that latest date
-      const filteredAQIData = aqiData.filter(entry => {
+      const filtered = aqiData.filter(entry => {
         const entryDate = new Date(entry.date_time).toISOString().split('T')[0];
         return entryDate === latestDate;
       });
 
-      // ✅ Display the last AQI value from that day in gauge
-      const lastEntry = filteredAQIData[filteredAQIData.length - 1];
-      if (lastEntry && lastEntry.aqi !== undefined) {
-        displayTotalScore(lastEntry.aqi);
-      }
+      const labels = filtered.map(entry => new Date(entry.date_time).toISOString().substring(11, 19));
+      const scores = filtered.map(entry => entry.aqi);
 
-      // === AQI Line Chart Rendering === (Your original logic)
-      if (Array.isArray(filteredAQIData)) {
-        const labels = filteredAQIData.map(entry => new Date(entry.date_time).toISOString().substring(11, 19));
-        const aqiValues = filteredAQIData.map(entry => entry.aqi);
-        const ctx = document.getElementById('aqiChart').getContext('2d');
-        if (chartInstance) {
-          chartInstance.destroy();
-        }
-
-        chartInstance = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'AQI Over Time',
-              data: aqiValues,
-              borderColor: 'rgba(75, 192, 192, 1)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              fill: true,
-              tension: 0.3,
-              pointRadius: 3,
-              pointHoverRadius: 5,
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: 'Time'
-                }
-              },
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'AQI'
-                }
-              }
-            }
-          }
-        });
-      }
+      renderAQILineChart(labels, scores);
     })
-    .catch(err => console.error("Error fetching data:", err));
-});
+    .catch(err => console.error("Error fetching AQI data:", err));
+}
 
+function renderAQILineChart(labels, scores) {
+  const ctx = document.getElementById('aqiChart').getContext('2d');
+  if (chartInstance) chartInstance.destroy();
 
-  // Always reinitialize the gauge after updating the DOM
-  gauges.total = new JustGage({
-    id: "totalGauge",
-    value: score,
-    min: 0,
-    max: 100,
-    label: "%",
-    levelColors: ["#A9C46C", "#809D3C", "#5D8736", "#D97706", "#DC2626"],
-    customSectors: [
-      { color: "#A9C46C", lo: 0, hi: 20 },
-      { color: "#809D3C", lo: 21, hi: 40 },
-      { color: "#5D8736", lo: 41, hi: 60 },
-      { color: "#D97706", lo: 61, hi: 80 },
-      { color: "#DC2626", lo: 81, hi: 100 }
-    ]
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Hourly AQI (%)',
+        data: scores,
+        borderColor: '#03045e',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: 'Time' } },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'AQI (%)' },
+          min: 0,
+          max: 100
+        }
+      }
+    }
   });
 }
 
-
-    function fetchLatestData() {
-      fetch('https://isatuairquality.onrender.com/latest')
+    function loadStations() {
+      fetch('https://isatuairquality.onrender.com/stations') 
         .then(res => res.json())
-        .then(data => {
-          if (!data || Object.keys(data).length === 0) return;
-          document.getElementById('dataContainer').innerHTML = '';
-          document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
-
-          for (const [key, value] of Object.entries(data)) {
-            if (key === 'transID') continue;
-            const div = document.createElement('div');
-            div.className = 'bg-white shadow p-4 rounded text-sm';
-            div.innerHTML = `<strong>${key}</strong><br>${value}`;
-            document.getElementById('dataContainer').appendChild(div);
-          }
-
-          const weightedData = computedNormalizedWeightedValues(data, weights, maxValues);
-          const totalScore = computeCompositeScore(weightedData);
-          displayTotalScore(totalScore);
-          updateValues(data);
-          updateStatus(data);
+        .then(stations => {
+          const select = document.getElementById('stationSelect');
+          stations.forEach(station => {
+            const opt = document.createElement('option');
+            opt.value = station.stationID;
+            opt.textContent = station.stationID;
+            select.appendChild(opt);
+          });
         });
     }
 
-    document.getElementById('stationSelect').addEventListener('change', function () {
-      const id = this.value;
-      if (!id) return;
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('mobileOverlay');
+      
+      if (isMobile) {
+        // Mobile behavior
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('hidden');
+      } else {
+        // Desktop behavior
+        sidebar.classList.toggle('collapsed');
+        sidebar.classList.toggle('expanded');
+        mainContent.classList.toggle('sidebar-collapsed');
+        mainContent.classList.toggle('sidebar-expanded');
+      }
+    }
 
-      fetch(`https://isatuairquality.onrender.com/stations/${id}`)
-        .then(res => res.json())
-        .then(data => {
-          if (!data || data.length === 0) return;
-          const latest = data[0];
+    function handleResize() {
+      const newIsMobile = window.innerWidth < 768;
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('mobileOverlay');
+      
+      if (newIsMobile !== isMobile) {
+        isMobile = newIsMobile;
+        
+        if (isMobile) {
+          // Switch to mobile mode
+          sidebar.classList.remove('collapsed', 'expanded');
+          sidebar.classList.remove('mobile-open');
+          mainContent.classList.remove('sidebar-collapsed', 'sidebar-expanded');
+          overlay.classList.add('hidden');
+        } else {
+          // Switch to desktop mode
+          sidebar.classList.remove('mobile-open');
+          sidebar.classList.add('expanded');
+          mainContent.classList.add('sidebar-expanded');
+          overlay.classList.add('hidden');
+        }
+      }
+    }
 
-          document.getElementById('dataContainer').innerHTML = '';
-          document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleString()}`;
-
-          for (const [key, value] of Object.entries(latest)) {
-            if (key === 'transID') continue;
-            const div = document.createElement('div');
-            div.className = 'bg-white shadow p-4 rounded text-sm';
-            div.innerHTML = `<strong>${key}</strong><br>${value}`;
-            document.getElementById('dataContainer').appendChild(div);
-          }
-
-          const weightedData = computedNormalizedWeightedValues(latest, weights, maxValues);
-          const totalScore = computeCompositeScore(weightedData);
-          displayTotalScore(totalScore);
-          updateValues(latest);
-          updateStatus(latest);
-        });
+    // Event Listeners
+    document.addEventListener("DOMContentLoaded", () => {
+      initGauges();
+      loadStations();
+      const spinner = document.getElementById('loadingSpinner');
+      spinner.classList.remove('hidden');
+      fetchLatestData().finally(() => spinner.classList.add('hidden'));
     });
 
-    fetch('https://isatuairquality.onrender.com/stations')
-      .then(res => res.json())
-      .then(stations => {
-        const select = document.getElementById('stationSelect');
-        stations.forEach(station => {
-          const opt = document.createElement('option');
-          opt.value = station.stationID;
-          opt.textContent = station.stationID;
-          select.appendChild(opt);
-        });
-      });
+    document.getElementById("stationSelect").addEventListener("change", function () {
+      const spinner = document.getElementById('loadingSpinner');
+      spinner.classList.remove('hidden');
+      fetchLatestData(this.value);
+    });
 
-    window.onload = () => {
-      initGauges();
-      fetchLatestData();
-    };
+    document.getElementById("parametersToggle").addEventListener("click", () => {
+      const dropdown = document.getElementById("parametersDropdown");
+      const arrow = document.getElementById("dropdownArrow");
+      dropdown.classList.toggle("hidden");
+      arrow.classList.toggle("rotate-180");
+    });
+
+    document.getElementById("sidebarToggle").addEventListener("click", toggleSidebar);
+
+    document.getElementById("mobileOverlay").addEventListener("click", () => {
+      if (isMobile) {
+        toggleSidebar();
+      }
+    });
+
+    window.addEventListener('resize', handleResize);
   </script>
 </body>
 </html>
