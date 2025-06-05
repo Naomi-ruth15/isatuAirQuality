@@ -3,300 +3,593 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Modern Air Quality Dashboard</title>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script> 
-
+  <title>Air Quality Monitoring System</title>
   <!-- External Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script> 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.4.0/justgage.min.js"></script> 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script> 
-
-
-  
-
-  <!-- Google Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+  <script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>  
+  <script src="https://cdn.jsdelivr.net/npm/justgage@1.4.0/justgage.min.js"></script>  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
+  <script src="https://cdn.tailwindcss.com"></script>  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     * {
-      font-family: 'Inter', sans-serif;
+      font-family: "Inter", sans-serif;
     }
-
-    /* Custom Scrollbar */
+    /* Glassmorphism */
+    .glass {
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.3); border-radius: 10px; }
-
-    /* Glass Card */
-    .glass-card {
-      backdrop-filter: blur(15px);
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Sidebar Gradient */
-    .sidebar-glass {
-      backdrop-filter: blur(15px);
-      background: linear-gradient(135deg, #1e3a8a, #3b82f6); 
-    }
-
-    /* Level Colors */
-    .level-good { background-color: #D1F1D1; }
-    .level-moderate { background-color: #FFE082; }
-    .level-unhealthy { background-color: #FFA726; }
-    .level-hazardous { background-color: #EF5350; }
-
-    /* Hover Scale Animation */
+    ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }  
     .hover-scale:hover {
       transform: scale(1.02);
       transition: transform 0.2s ease-in-out;
     }
-
-    /* Modal Styles */
-    .modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea, #764ba2);
     }
-
-    .modal-card {
-      background: white;
-      padding: 1rem;
-      border-radius: 1rem;
-      max-width: 800px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
+    @keyframes pulse-gentle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
-
-    .station-card {
-      border: 1px solid #ddd;
-      padding: 1rem;
-      margin: 0.5rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: 0.2s;
+    .status-online {
+      animation: pulse-gentle 2s infinite;
     }
-
-    .station-card:hover {
-      background-color: #f0f8ff;
+    
+    /* Sidebar Transitions */
+    .sidebar {
+      transition: width 0.3s ease-in-out;
+    }
+    .sidebar.collapsed {
+      width: 4rem;
+    }
+    .sidebar.expanded {
+      width: 16rem;
+    }
+    
+    /* Navigation Text */
+    .nav-text {
+      transition: opacity 0.3s ease-in-out;
+    }
+    .sidebar.collapsed .nav-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+    .sidebar.expanded .nav-text {
+      opacity: 1;
+      width: auto;
+    }
+    
+    /* Dropdown Arrow */
+    .dropdown-arrow {
+      transition: opacity 0.3s ease-in-out;
+    }
+    .sidebar.collapsed .dropdown-arrow {
+      opacity: 0;
+    }
+    
+    /* Main Content Margin */
+    .main-content {
+      transition: margin-left 0.3s ease-in-out;
+    }
+    .main-content.sidebar-expanded {
+      margin-left: 16rem;
+    }
+    .main-content.sidebar-collapsed {
+      margin-left: 4rem;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 50;
+        transform: translateX(-100%);
+        width: 16rem !important;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0 !important;
+      }
+    }
+    
+    /* Tooltip for collapsed sidebar */
+    .tooltip {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 1000;
+    }
+    .nav-item:hover .tooltip {
+      opacity: 1;
+    }
+    .sidebar.expanded .tooltip {
+      display: none;
     }
   </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 text-gray-800 min-h-screen">
 
-<!-- SIDEBAR -->
-<aside id="sidebar" class="fixed top-0 left-0 h-full w-64 sidebar-glass text-white z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
-  <div class="p-4 border-b border-white/20">
-    <h1 class="text-xl font-bold">AirWatch</h1>
-    <p class="text-sm text-white/70">Quality Monitor</p>
-  </div>
-  <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-    <a href="maindashboard.html" class="block px-3 py-2 rounded hover:bg-blue-800 text-white nav-link">
-      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/grid.svg" class="nav-icon inline mr-2" alt="Dashboard" />
-      Dashboard
-    </a>
-    <a href="home.html" class="block px-3 py-2 rounded hover:bg-blue-800 text-white nav-link">
-      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/home.svg" class="nav-icon inline mr-2" alt="Home" />
-      Home
-    </a>
-   <div class="space-y-1">
-  <button id="parametersToggle" class="w-full text-left px-3 py-2 rounded hover:bg-blue-800 flex justify-between items-center nav-link">
-    <span class="flex items-center">
-      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/sliders.svg" class="w-5 h-5 mr-2" alt="Parameters" />
-      Parameters
-    </span>
-    <i id="dropdownArrow" class="fas fa-chevron-down"></i>
-  </button>
-  <div id="parametersDropdown" class="hidden ml-6 space-y-1">
-    <a href="parameters/tvoc.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
-<img src="https://cdn.jsdelivr.net/npm/lucide-static@0.292.0/icons/test-tube.svg" class="w-5 h-5 mr-2" alt="TVOC" />
-      TVOC
-    </a>
-    <a href="parameters/eco2.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
-      <img src="https://cdn.jsdelivr.net/npm/@tabler/icons@2.18.0/icons/cloud.svg" class="w-5 h-5 mr-2" alt="eCO2" />
-      eCO2
-    </a>
-    <a href="parameters/temperature.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
-      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/thermometer.svg" class="w-5 h-5 mr-2" alt="Temperature" />
-      Temperature
-    </a>
-    <a href="parameters/humidity.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
-      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/droplet.svg" class="w-5 h-5 mr-2" alt="Humidity" />
-      Humidity
-    </a>
-    <a href="parameters/dustDensity.html" class="block px-3 py-1 text-sm hover:bg-blue-800 rounded dropdown-item flex items-center">
-      <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/air-filter.svg" class="w-5 h-5 mr-2" alt="Dust Density" />
-      Dust Density
-    </a>
-  </div>
-</div>
-    <a href="history.html" class="block px-3 py-2 rounded hover:bg-blue-800 text-white nav-link">
-      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/clock.svg" class="nav-icon inline mr-2" alt="History" />
-      History
-    </a>
-    <a href="historicalAQI.html" class="block px-3 py-2 rounded hover:bg-blue-800 text-white nav-link">
-      <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/wind.svg" class="nav-icon inline mr-2" alt="Air Quality" />
-      Air Quality Index
-    </a>
-  </nav>
-</aside>
-
-
-<!-- HAMBURGER BUTTON -->
-<button id="hamburger" class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded shadow-md">
-  <i class="fas fa-bars"></i>
-</button>
-
-<!-- MAIN CONTENT -->
-<main class="lg:ml-64 p-6 min-h-screen transition-all duration-300">
-  <header class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-800">Air Quality Dashboard</h1>
-    <p class="text-gray-600">Real-time monitoring of environmental parameters</p>
-  </header>
-
-  <!-- STATION SELECTOR -->
-  <section class="mb-6 glass-card p-4 rounded-lg shadow">
-    <button id="openStationModal" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition mb-2">
-      <i class="fas fa-broadcast-tower mr-2"></i>Select Monitoring Station
-    </button>
-    <p id="lastUpdated" class="mt-2 text-sm text-gray-500">Last updated: --</p>
-  </section>
-
-  <!-- SELECTED STATION CARD -->
-  <div id="selectedStationCard" class="mb-6 hidden glass-card p-4 rounded-lg shadow-md flex items-center space-x-4">
-    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-      <i class="fas fa-broadcast-tower text-blue-600 text-xl"></i>
-    </div>
-    <div>
-      <p class="text-sm text-gray-600">Selected Station</p>
-      <p id="selectedStationText" class="text-lg font-medium">None selected</p>
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white p-4 rounded-full shadow-lg flex flex-col items-center">
+      <i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i>
+      <span class="mt-2 text-sm font-medium text-gray-700">Loading station data...</span>
     </div>
   </div>
 
-  <!-- AQI CHART -->
-<section class="mb-6 glass-card p-6 rounded-lg shadow">
-  <canvas id="aqiChart" height="100"></canvas>
-</section>
+  <!-- Mobile Overlay -->
+  <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
 
-  <!-- GAUGES SECTION -->
-  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-    <div class="glass-card p-4 rounded-lg text-center hover-scale">
-      <div id="tvocGauge" style="height: 160px;"></div>
-      <h3 class="font-semibold mt-2">TVOC</h3>
-      <p id="tvocStatus" class="mt-1 text-sm"></p>
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 left-0 h-full bg-gradient-to-b from-blue-800 to-indigo-900 text-white sidebar expanded flex flex-col shadow-xl">
+    <!-- Header -->
+    <div class="p-4 border-b border-white/20 flex items-center">
+      <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-leaf text-white text-sm"></i>
+      </div>
+      <div class="nav-text ml-3 overflow-hidden">
+        <h1 class="text-lg font-bold">ISAT U Ambiance</h1>
+        <p class="text-xs text-white/70">Indoor Air Quality Monitoring</p>
+      </div>
     </div>
-    <div class="glass-card p-4 rounded-lg text-center hover-scale">
-      <div id="eCO2Gauge" style="height: 160px;"></div>
-      <h3 class="font-semibold mt-2">eCO2</h3>
-      <p id="eCO2Status" class="mt-1 text-sm"></p>
+    
+    <!-- Navigation -->
+    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+      <div class="nav-item relative">
+        <a href="maindashboard.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+          <i class="fas fa-th-large w-5 h-5 flex-shrink-0"></i>
+          <span class="nav-text ml-3">Dashboard</span>
+          <div class="tooltip">Dashboard</div>
+        </a>
+      </div>
+      
+      <div class="nav-item relative">
+        <a href="home.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+          <i class="fas fa-home w-5 h-5 flex-shrink-0"></i>
+          <span class="nav-text ml-3">Home</span>
+          <div class="tooltip">Home</div>
+        </a>
+      </div>
+
+      <!-- Parameters Dropdown -->
+      <div class="space-y-1">
+        <div class="nav-item relative">
+          <button id="parametersToggle" class="w-full flex items-center justify-between px-3 py-2 rounded hover:bg-blue-700 text-left">
+            <div class="flex items-center">
+              <i class="fas fa-sliders-h w-5 h-5 flex-shrink-0"></i>
+              <span class="nav-text ml-3">Parameters</span>
+            </div>
+            <i id="dropdownArrow" class="fas fa-chevron-down dropdown-arrow nav-text"></i>
+            <div class="tooltip">Parameters</div>
+          </button>
+        </div>
+        
+        <div id="parametersDropdown" class="hidden nav-text ml-4 space-y-1">
+          <a href="parameters/tvoc.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-vial w-4 h-4 mr-2"></i>
+            TVOC
+          </a>
+          <a href="parameters/eco2.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-cloud w-4 h-4 mr-2"></i>
+            eCO2
+          </a>
+          <a href="parameters/temperature.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-thermometer-half w-4 h-4 mr-2"></i>
+            Temperature
+          </a>
+          <a href="parameters/humidity.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-tint w-4 h-4 mr-2"></i>
+            Humidity
+          </a>
+          <a href="parameters/dustDensity.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center">
+            <i class="fas fa-smog w-4 h-4 mr-2"></i>
+            Dust Density
+          </a>
+        </div>
+      </div>
+
+      <div class="nav-item relative">
+        <a href="history.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+          <i class="fas fa-history w-5 h-5 flex-shrink-0"></i>
+          <span class="nav-text ml-3">History</span>
+          <div class="tooltip">History</div>
+        </a>
+      </div>
+      
+      <div class="nav-item relative">
+        <a href="historicalAQI.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+          <i class="fas fa-wind w-5 h-5 flex-shrink-0"></i>
+          <span class="nav-text ml-3">Air Quality Index</span>
+          <div class="tooltip">Air Quality Index</div>
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main id="mainContent" class="main-content sidebar-expanded overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-30 p-4 mb-6">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <button id="sidebarToggle" class="text-xl mr-4 text-blue-600 hover:text-blue-800 transition-colors">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="text-xl font-semibold text-gray-800">Air Quality Monitoring</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <select id="stationSelect" class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">All Stations</option>
+          </select>
+          <span class="inline-flex items-center text-green-600">
+            <span class="status-dot status-online inline-block w-2 h-2 rounded-full bg-green-400 mr-2"></span>
+            <span class="hidden sm:inline">Live Monitoring</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <div class="px-6 pb-6">
+      <!-- Welcome Section -->
+      <section class="mb-8">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 text-white">
+          <div class="flex flex-col md:flex-row justify-between items-center">
+            <div>
+              <h2 class="text-3xl font-bold">Real-time Air Quality</h2>
+              <p class="text-blue-100 mt-2">Monitor environmental conditions across all stations</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+              <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <i class="fas fa-leaf text-white text-2xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Gauges Grid -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">TVOC</h3>
+          <div id="tvocGauge" class="h-40"></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">eCO2</h3>
+          <div id="eCO2Gauge" class="h-40"></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">Temperature</h3>
+          <div id="temperatureGauge" class="h-40"></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">Humidity</h3>
+          <div id="humidityGauge" class="h-40"></div>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg p-4 text-center hover-scale">
+          <h3 class="font-semibold uppercase text-sm text-gray-600 mb-2">Dust Density</h3>
+          <div id="dustGauge" class="h-40"></div>
+        </div>
+      </section>
+
+      <!-- Total AQI -->
+      <section class="mb-8">
+        <div class="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow">
+          <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Total Air Quality Index</h2>
+          <div class="flex justify-center">
+            <div id="totalGauge" class="h-64"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Data Cards -->
+      <section class="mb-8">
+        <div id="lastUpdated" class="text-sm text-green-600 mb-4 font-medium"></div>
+        <div id="dataContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"></div>
+      </section>
+
+      <!-- Chart Section -->
+      <section class="mb-8">
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-2xl font-bold text-gray-800">Today's AQI Trends</h3>
+              <p class="text-gray-600">Real-time air quality variations throughout the day</p>
+            </div>
+            <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+              <i class="fas fa-chart-line text-white"></i>
+            </div>
+          </div>
+          <canvas id="aqiChart" width="400" height="100"></canvas>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="text-center text-sm text-gray-500 mt-8 py-4">
+        <p>&copy; 2025 ISAT U Ambiance. An Indoor Air Quality Monitoring System.</p>
+      </footer>
     </div>
-    <div class="glass-card p-4 rounded-lg text-center hover-scale">
-      <div id="temperatureGauge" style="height: 160px;"></div>
-      <h3 class="font-semibold mt-2">Temperature</h3>
-      <p id="temperatureStatus" class="mt-1 text-sm"></p>
-    </div>
-    <div class="glass-card p-4 rounded-lg text-center hover-scale">
-      <div id="humidityGauge" style="height: 160px;"></div>
-      <h3 class="font-semibold mt-2">Humidity</h3>
-      <p id="humidityStatus" class="mt-1 text-sm"></p>
-    </div>
-    <div class="glass-card p-4 rounded-lg text-center hover-scale">
-      <div id="dustGauge" style="height: 160px;"></div>
-      <h3 class="font-semibold mt-2">Dust Density</h3>
-      <p id="dustDensityStatus" class="mt-1 text-sm"></p>
-    </div>
-  </section>
+  </main>
 
-  <!-- COMPOSITE AQI SCORE -->
-  <section class="mb-6 glass-card p-6 rounded-lg shadow flex flex-col items-center">
-    <h2 class="text-xl font-semibold mb-4">Overall Air Quality Index</h2>
-    <div id="weightedContainer" class="my-4">
-      <div id="totalGauge" style="height: 200px; width: 200px;"></div>
-    </div>
-    <div id="aqiStatus" class="mt-4 px-4 py-2 rounded-full text-sm font-medium">
-      Calculating...
-    </div>
-  </section>
+  <!-- Scripts -->
+  <script>
+    const thresholds = {
+      tvoc: [250, 500, 1000, 2000],
+      eCO2: [400, 800, 1200, 2000],
+      temperature: [18, 24, 30, 36],
+      humidity: [30, 50, 70, 85],
+      dustDensity: [35, 70, 110, 160]
+    };
+    const weights = {
+      tvoc: 0.2,
+      eCO2: 0.2,
+      humidity: 0.15,
+      temperature: 0.15,
+      dustDensity: 0.3
+    };
+    const maxValues = {
+      tvoc: 3000,
+      eCO2: 3000,
+      humidity: 100,
+      temperature: 50,
+      dustDensity: 200
+    };
+    let gauges = {};
+    let chartInstance = null;
+    let isMobile = window.innerWidth < 768;
 
-  <!-- AQI CHART -->
-  <section class="mb-6 glass-card p-6 rounded-lg shadow">
-    <canvas id="aqiChart" height="100"></canvas>
-  </section>
+    function initGauges() {
+      gauges.tvoc = new JustGage({ id: "tvocGauge", value: 0, min: 0, max: 3000 });
+      gauges.eCO2 = new JustGage({ id: "eCO2Gauge", value: 0, min: 0, max: 3000 });
+      gauges.temperature = new JustGage({ id: "temperatureGauge", value: 0, min: 0, max: 50 });
+      gauges.humidity = new JustGage({ id: "humidityGauge", value: 0, min: 0, max: 100 });
+      gauges.dust = new JustGage({ id: "dustGauge", value: 0, min: 0, max: 200 });
+      gauges.total = new JustGage({
+        id: "totalGauge",
+        value: 0,
+        min: 0,
+        max: 100,
+        label: "%",
+        levelColors: ["#A9C46C", "#809D3C", "#5D8736", "#D97706", "#DC2626"],
+        customSectors: [
+          { color: "#A9C46C", lo: 0, hi: 20 },
+          { color: "#809D3C", lo: 21, hi: 40 },
+          { color: "#5D8736", lo: 41, hi: 60 },
+          { color: "#D97706", lo: 61, hi: 80 },
+          { color: "#DC2626", lo: 81, hi: 100 }
+        ]
+      });
+    }
 
-  <!-- DYNAMIC DATA CARDS -->
-  <section id="dataContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></section>
-</main>
+    function displayDataCards(data) {
+      const container = document.getElementById('dataContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      for (const [key, value] of Object.entries(data)) {
+        if (key === 'transID') continue;
+        const div = document.createElement('div');
+        div.className = 'bg-white shadow-lg rounded-lg p-4 hover:shadow-xl transition-shadow';
+        div.innerHTML = `<div class="text-sm text-gray-500 font-medium uppercase">${key}</div><div class="text-xl font-bold text-gray-800 mt-1">${value}</div>`;
+        container.appendChild(div);
+      }
+    }
 
-<!-- MODAL FOR STATION SELECTION -->
-<div id="stationModal" class="modal hidden">
-  <div class="modal-card">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold">Select Monitoring Station</h2>
-      <button id="closeStationModal" class="text-red-500"><i class="fas fa-times text-xl"></i></button>
-    </div>
-    <div id="stationCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
-  </div>
-</div>
+    function updateValues(data) {
+      for (const key in gauges) {
+        if (data[key] !== undefined && gauges[key]) {
+          gauges[key].refresh(data[key]);
+        }
+      }
+    }
 
-<!-- Load dashboard.js -->
-<script src="./scripts//dashboard.js"></script>
+   function computeAndDisplayAQI(data) {
+  const weighted = computedNormalizedWeightedValues(data, weights, maxValues);
+  const score = computeCompositeScore(weighted);
+  if (gauges.total) gauges.total.refresh(Math.round(score));
+}
 
-<!-- Inline Scripts for UI Interactivity -->
-<script>
-  // Page-specific JS
+function computedNormalizedWeightedValues(data, weights, maxValues) {
+  const weightedData = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (weights[key] !== undefined && maxValues[key] !== undefined) {
+      const normalized = Math.min(value / maxValues[key], 1);
+      weightedData[key] = { weightedValue: normalized * weights[key] };
+    }
+  }
+  return weightedData;
+}
 
-  window.onload = () => {
-    initGauges();
-    loadStations();
-    fetchLatestData();
-  };
+function computeCompositeScore(weightedData) {
+  return Object.values(weightedData).reduce((sum, item) => sum + item.weightedValue, 0) * 100;
+}
 
-  // Toggle Parameters Dropdown
-  document.getElementById('parametersToggle').addEventListener('click', () => {
-    const dropdown = document.getElementById('parametersDropdown');
-    const arrow = document.getElementById('dropdownArrow');
-    dropdown.classList.toggle('hidden');
-    arrow.classList.toggle('rotate-180');
-  });
 
-  // Modal Controls
-  document.getElementById('openStationModal').addEventListener('click', () => {
-    document.getElementById('stationModal').classList.remove('hidden');
-  });
+   function fetchLatestData(stationId = '') {
+  const url = stationId
+    ? `https://isatuairquality.onrender.com/stations/${stationId}`  
+    : 'https://isatuairquality.onrender.com/latest';
 
-  document.getElementById('closeStationModal').addEventListener('click', () => {
-    document.getElementById('stationModal').classList.add('hidden');
-  });
-</script>
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const latest = Array.isArray(data) ? data[0] : data;
+      displayDataCards(latest);
+      updateValues(latest);
+      computeAndDisplayAQI(latest);
+      fetchAQIData(stationId);
+    })
+    .catch(err => console.error("Error fetching station data:", err))
+    .finally(() => {
+      document.getElementById('loadingSpinner').classList.add('hidden');
+    });
+}
 
-<!-- Sidebar Toggle Logic -->
-<script>
-  const sidebar = document.getElementById('sidebar');
-  const hamburger = document.getElementById('hamburger');
+function fetchAQIData(stationId = '') {
+  const url = stationId
+    ? `https://isatuairquality.onrender.com/aqi/stations/${stationId}`  // ✅ Fixed backticks
+    : 'https://isatuairquality.onrender.com/aqi/latest';
 
-  hamburger.addEventListener('click', () => {
-    sidebar.classList.remove('-translate-x-full');
-  });
+  fetch(url)
+    .then(res => res.json())
+    .then(aqiData => {
+      if (!aqiData || aqiData.length === 0) return;
 
-  document.addEventListener('click', (e) => {
-    if (
-      window.innerWidth < 768 &&
-      !sidebar.contains(e.target) &&
-      !hamburger.contains(e.target)
-    ) {
-      sidebar.classList.add('-translate-x-full');
+      const latestDate = aqiData
+        .map(entry => new Date(entry.date_time).toISOString().split('T')[0])
+        .sort()
+        .reverse()[0];
+
+      const filtered = aqiData.filter(entry => {
+        const entryDate = new Date(entry.date_time).toISOString().split('T')[0];
+        return entryDate === latestDate;
+      });
+
+      const labels = filtered.map(entry => new Date(entry.date_time).toISOString().substring(11, 19));
+      const scores = filtered.map(entry => entry.aqi);
+
+      renderAQILineChart(labels, scores);
+    })
+    .catch(err => console.error("Error fetching AQI data:", err));
+}
+
+function renderAQILineChart(labels, scores) {
+  const ctx = document.getElementById('aqiChart').getContext('2d');
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Hourly AQI (%)',
+        data: scores,
+        borderColor: '#5D8736',
+        backgroundColor: 'rgba(93, 135, 54, 0.2)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: 'Time' } },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'AQI (%)' },
+          min: 0,
+          max: 100
+        }
+      }
     }
   });
-</script>
+}
 
+
+    function loadStations() {
+      fetch('https://isatuairquality.onrender.com/stations') 
+        .then(res => res.json())
+        .then(stations => {
+          const select = document.getElementById('stationSelect');
+          stations.forEach(station => {
+            const opt = document.createElement('option');
+            opt.value = station.stationID;
+            opt.textContent = station.stationID;
+            select.appendChild(opt);
+          });
+        });
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('mobileOverlay');
+      
+      if (isMobile) {
+        // Mobile behavior
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('hidden');
+      } else {
+        // Desktop behavior
+        sidebar.classList.toggle('collapsed');
+        sidebar.classList.toggle('expanded');
+        mainContent.classList.toggle('sidebar-collapsed');
+        mainContent.classList.toggle('sidebar-expanded');
+      }
+    }
+
+    function handleResize() {
+      const newIsMobile = window.innerWidth < 768;
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const overlay = document.getElementById('mobileOverlay');
+      
+      if (newIsMobile !== isMobile) {
+        isMobile = newIsMobile;
+        
+        if (isMobile) {
+          // Switch to mobile mode
+          sidebar.classList.remove('collapsed', 'expanded');
+          sidebar.classList.remove('mobile-open');
+          mainContent.classList.remove('sidebar-collapsed', 'sidebar-expanded');
+          overlay.classList.add('hidden');
+        } else {
+          // Switch to desktop mode
+          sidebar.classList.remove('mobile-open');
+          sidebar.classList.add('expanded');
+          mainContent.classList.add('sidebar-expanded');
+          overlay.classList.add('hidden');
+        }
+      }
+    }
+
+    // Event Listeners
+    document.addEventListener("DOMContentLoaded", () => {
+      initGauges();
+      loadStations();
+      const spinner = document.getElementById('loadingSpinner');
+      spinner.classList.remove('hidden');
+      fetchLatestData().finally(() => spinner.classList.add('hidden'));
+    });
+
+    document.getElementById("stationSelect").addEventListener("change", function () {
+      const spinner = document.getElementById('loadingSpinner');
+      spinner.classList.remove('hidden');
+      fetchLatestData(this.value);
+    });
+
+    document.getElementById("parametersToggle").addEventListener("click", () => {
+      const dropdown = document.getElementById("parametersDropdown");
+      const arrow = document.getElementById("dropdownArrow");
+      dropdown.classList.toggle("hidden");
+      arrow.classList.toggle("rotate-180");
+    });
+
+    document.getElementById("sidebarToggle").addEventListener("click", toggleSidebar);
+
+    document.getElementById("mobileOverlay").addEventListener("click", () => {
+      if (isMobile) {
+        toggleSidebar();
+      }
+    });
+
+    window.addEventListener('resize', handleResize);
+  </script>
 </body>
 </html>
