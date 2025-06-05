@@ -3,28 +3,261 @@
 <head>
   <meta charset="UTF-8">
   <title>AQI Line Graph by Date</title>
+  <!-- External Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script> 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Styles -->
+  <style>
+    * {
+      font-family: "Inter", sans-serif;
+    }
+    .glass {
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }
+    
+    .hover-scale:hover {
+      transform: scale(1.02);
+      transition: transform 0.2s ease-in-out;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    
+    /* Sidebar Styles */
+    .nav-text {
+      transition: opacity 0.3s ease, width 0.3s ease;
+    }
+    
+    #sidebar {
+      transition: width 0.3s ease;
+    }
+    
+    #sidebar.collapsed {
+      width: 4rem;
+    }
+    
+    #sidebar.collapsed .nav-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    #sidebar.collapsed .dropdown-arrow {
+      opacity: 0;
+    }
+    
+    /* Main content margin adjustment */
+    .main-content {
+      margin-left: 16rem; /* 256px sidebar width */
+      transition: margin-left 0.3s ease;
+    }
+    
+    .main-content.sidebar-collapsed {
+      margin-left: 4rem; /* 64px collapsed sidebar width */
+    }
+    
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .main-content,
+      .main-content.sidebar-collapsed {
+        margin-left: 0;
+      }
+      
+      #sidebar {
+        transform: translateX(-100%);
+      }
+      
+      #sidebar.mobile-open {
+        transform: translateX(0);
+      }
+    }
+    
+    /* Table responsiveness */
+    .table-container {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    
+    table {
+      min-width: 600px;
+    }
+    
+    /* Loading overlay */
+    .loading-overlay {
+      backdrop-filter: blur(4px);
+    }
+  </style>
 </head>
-<body class="bg-green-50 p-6 font-sans">
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
-    <h1 class="text-2xl font-bold mb-6 text-blue-700">AQI Line Graph</h1>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
 
-    <!-- Station Dropdown -->
-    <div class="mb-4">
-      <label class="block text-sm font-semibold text-blue-700" for="stationSelect">Select Station:</label>
-      <select id="stationSelect" class="border p-2 rounded w-full max-w-xs">
-        <option value="">Loading stations...</option>
-      </select>
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden loading-overlay">
+    <div class="bg-white p-6 rounded-xl shadow-2xl flex flex-col items-center">
+      <i class="fas fa-spinner fa-spin text-blue-600 text-4xl"></i>
+      <span class="mt-3 text-sm font-medium text-gray-700">Loading station data...</span>
     </div>
+  </div>
 
-    <!-- Date Dropdown -->
-    <div class="mb-6">
-      <label class="block text-sm font-semibold text-blue-700" for="dateSelect">Select Date:</label>
-      <select id="dateSelect" class="border p-2 rounded w-full max-w-xs" disabled>
-        <option value="">Select station first</option>
-      </select>
+  <!-- Sidebar -->
+  <aside id="sidebar"
+    class="fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-blue-800 to-indigo-900 text-white z-40 flex flex-col shadow-2xl">
+    
+    <!-- Sidebar Header -->
+    <div class="p-4 border-b border-white/20 flex items-center justify-between">
+      <div class="flex items-center">
+        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+          <i class="fas fa-wind text-white"></i>
+        </div>
+        <div class="nav-text">
+          <h1 class="text-xl font-bold">ISAT U Ambiance</h1>
+          <p class="text-xs text-white/70">Indoor Air Quality Monitoring System</p>
+        </div>
+      </div>
+      <button id="sidebarCollapseBtn" class="hidden md:block p-1 hover:bg-white/10 rounded">
+        <i class="fas fa-angle-left"></i>
+      </button>
     </div>
+    
+    <!-- Navigation -->
+    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+      <a href="../maindashboard.html" class="block px-3 py-2 rounded-lg hover:bg-blue-700/50 text-white nav-link flex items-center group">
+        <i class="fas fa-th-large w-5 h-5 mr-3 text-center"></i>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      
+      <a href="./home.html" class="block px-3 py-2 rounded-lg hover:bg-blue-700/50 text-white nav-link flex items-center group">
+        <i class="fas fa-home w-5 h-5 mr-3 text-center"></i>
+        <span class="nav-text">Home</span>
+      </a>
+
+      <!-- Parameters Dropdown -->
+      <div class="space-y-1">
+        <button id="parametersToggle" class="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-700/50 flex justify-between items-center group">
+          <span class="flex items-center">
+            <i class="fas fa-sliders-h w-5 h-5 mr-3 text-center"></i>
+            <span class="nav-text">Parameters</span>
+          </span>
+          <i id="dropdownArrow" class="fas fa-chevron-down dropdown-arrow nav-text transition-transform"></i>
+        </button>
+        
+       <div id="parametersDropdown" class="hidden ml-6 space-y-1 mt-2">
+          <a href="parameters/tvoc.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200 bg-white/5">
+            <i class="fas fa-flask w-4 h-4 mr-3 text-blue-300"></i>
+            <span>TVOC</span>
+          </a>
+          <a href="parameters/eco2.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
+            <i class="fas fa-cloud w-4 h-4 mr-3 text-white/70"></i>
+            <span>eCO2</span>
+          </a>
+          <a href="parameters/temperature.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
+            <i class="fas fa-thermometer-half w-4 h-4 mr-3 text-white/70"></i>
+            <span>Temperature</span>
+          </a>
+          <a href="parameters/humidity.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
+            <i class="fas fa-tint w-4 h-4 mr-3 text-white/70"></i>
+            <span>Humidity</span>
+          </a>
+          <a href="parameters/dustDensity.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
+            <i class="fas fa-smog w-4 h-4 mr-3 text-white/70"></i>
+            <span>Dust Density</span>
+          </a>
+        </div>
+      </div>
+
+      <a href="history.html" class="block px-3 py-2 rounded-lg text-white hover:bg-white/10 transition-colors duration-200 nav-link flex items-center">
+        <i class="fas fa-clock w-5 h-5 mr-3 text-center"></i>
+        <span class="nav-text">History</span>
+      </a>
+
+      <a href="./historicalAQI.html" class="group flex items-center px-4 py-3 rounded-xl bg-blue-700/70 ">
+        <i class="fas fa-wind w-5 h-5 mr-3 text-white/80 group-hover:text-white"></i>
+        <span class="font-medium">Air Quality Index</span>
+      </a>
+    </nav>
+
+    
+  </aside>
+
+  <!-- Mobile Menu Overlay -->
+  <div id="mobileOverlay" class="md:hidden fixed inset-0 bg-black/50 z-30 hidden"></div>
+
+  <!-- Hamburger Menu Button -->
+  <button id="mobileMenuToggle"
+    class="md:hidden fixed top-4 left-4 z-50 text-white bg-blue-700 p-3 rounded-lg shadow-lg hover:bg-blue-800 transition-colors">
+    <i class="fas fa-bars"></i>
+  </button>
+
+   <!-- Main Content -->
+ <main id="mainContent" class="main-content min-h-screen">
+  <div class="p-6">
+    <!-- Header Section -->
+    <header class="bg-white/90 backdrop-blur-md shadow-lg rounded-2xl p-6 mb-8 border border-white/20">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center">
+          <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center mr-4">
+            <i class="fas fa-history text-white text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800">Station History Viewer</h1>
+            <p class="text-gray-600 text-sm">Monitor historical sensor data</p>
+          </div>
+        </div>
+        <!-- Dropdowns -->
+        <div class="flex flex-col md:flex-row gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-blue-700" for="stationSelect">Select Station:</label>
+            <select id="stationSelect" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-48">
+              <option value="">-- Select Station --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-blue-700" for="dateSelect">Select Date:</label>
+            <select id="dateSelect" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-48" disabled>
+              <option value="">-- Select Date --</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Welcome Section -->
+    <section class="mb-8">
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl shadow-lg p-8 border border-blue-200/50">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="text-center md:text-left">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Historical AQI Data</h2>
+            <p class="text-gray-600 text-lg">Access comprehensive historical AQI data from all monitoring stations</p>
+            <div class="flex flex-wrap gap-4 mt-4">
+              <div class="flex items-center text-sm text-gray-600">
+                <i class="fas fa-database mr-2 text-blue-600"></i>
+                Real-time Data Collection
+              </div>
+              <div class="flex items-center text-sm text-gray-600">
+                <i class="fas fa-download mr-2 text-green-600"></i>
+                Image and CSV Export Available
+              </div>
+              <div class="flex items-center text-sm text-gray-600">
+                <i class="fas fa-chart-line mr-2 text-purple-600"></i>
+                Detailed Analytics
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 md:mt-0">
+            <div class="w-20 h-20 gradient-bg rounded-2xl flex items-center justify-center shadow-lg">
+              <i class="fas fa-clock text-white text-2xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- AQI Chart -->
     <canvas id="aqiChart" height="100"></canvas>
@@ -33,21 +266,21 @@
       <button id="downloadBtn" class="bg-blue-700 hover:bg-green-800 text-white px-4 py-2 rounded">
         Download Chart
       </button>
-
       <button id="downloadCsvBtn" class="bg-blue-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2">
         Download CSV
       </button>
     </div>
   </div>
+</main>
 
-  <script>
-    const stationSelect = document.getElementById('stationSelect');
-    const dateSelect = document.getElementById('dateSelect');
-    const ctx = document.getElementById('aqiChart').getContext('2d');
-    let chart;
+<script>
+  const stationSelect = document.getElementById('stationSelect');
+  const dateSelect = document.getElementById('dateSelect');
+  const ctx = document.getElementById('aqiChart').getContext('2d');
+  let chart;
 
-    // Load station list
-    async function loadStations() {
+  async function loadStations() {
+    try {
       const res = await fetch(`https://isatuairquality.onrender.com/stations`);
       const stations = await res.json();
       stationSelect.innerHTML = `<option value="">-- Select Station --</option>`;
@@ -57,10 +290,14 @@
         option.textContent = station.stationID;
         stationSelect.appendChild(option);
       });
+    } catch (err) {
+      alert("Failed to load stations.");
+      console.error(err);
     }
+  }
 
-    // Load available dates for selected station
-    async function loadDates(stationID) {
+  async function loadDates(stationID) {
+    try {
       const res = await fetch(`https://isatuairquality.onrender.com/dates/${stationID}`);
       const dates = await res.json();
       dateSelect.disabled = false;
@@ -71,17 +308,25 @@
         option.textContent = date;
         dateSelect.appendChild(option);
       });
+    } catch (err) {
+      alert("Failed to load dates.");
+      console.error(err);
     }
+  }
 
-    // Load and display AQI for station + specific date
-    async function loadAndPlotAQI(stationID, selectedDate) {
+  async function loadAndPlotAQI(stationID, selectedDate) {
+    try {
       const res = await fetch(`https://isatuairquality.onrender.com/aqi/stations/${stationID}`);
       const data = await res.json();
 
-      // Filter data by selected date
+      if (!Array.isArray(data)) {
+        alert("Unexpected data format.");
+        return;
+      }
+
       const filtered = data.filter(entry => {
-        const dateOnly = new Date(entry.date_time).toISOString().split('T')[0];
-        return dateOnly === selectedDate;
+        const localDate = new Date(entry.date_time).toLocaleDateString('en-CA'); // YYYY-MM-DD
+        return localDate === selectedDate;
       });
 
       if (!filtered || filtered.length === 0) {
@@ -89,10 +334,16 @@
         return;
       }
 
-      const labels = filtered.map(d => new Date(d.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      const labels = filtered.map(d =>
+        new Date(d.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      );
       const aqiValues = filtered.map(d => d.aqi);
 
-      if (chart) chart.destroy();
+      try {
+        if (chart) chart.destroy();
+      } catch (e) {
+        console.warn("Error destroying chart", e);
+      }
 
       chart = new Chart(ctx, {
         type: 'line',
@@ -128,81 +379,98 @@
           }
         }
       });
+
+    } catch (err) {
+      alert("Failed to load AQI data.");
+      console.error(err);
     }
+  }
 
-    // Event Listeners
-    stationSelect.addEventListener('change', () => {
-      const stationID = stationSelect.value;
-      if (stationID) {
-        loadDates(stationID);
-        dateSelect.innerHTML = `<option value="">Loading dates...</option>`;
-      } else {
-        dateSelect.disabled = true;
-        dateSelect.innerHTML = `<option value="">Select station first</option>`;
-      }
-    });
+  stationSelect.addEventListener('change', () => {
+    const stationID = stationSelect.value;
+    if (stationID) {
+      dateSelect.innerHTML = `<option value="">Loading dates...</option>`;
+      loadDates(stationID);
+    } else {
+      dateSelect.disabled = true;
+      dateSelect.innerHTML = `<option value="">-- Select Date --</option>`;
+    }
+  });
 
-    dateSelect.addEventListener('change', () => {
-      const stationID = stationSelect.value;
-      const selectedDate = dateSelect.value;
-      if (stationID && selectedDate) {
-        loadAndPlotAQI(stationID, selectedDate);
-      }
-    });
+  dateSelect.addEventListener('change', () => {
+    const stationID = stationSelect.value;
+    const selectedDate = dateSelect.value;
+    if (stationID && selectedDate) {
+      loadAndPlotAQI(stationID, selectedDate);
+    }
+  });
 
-    // Download chart as image
   document.getElementById('downloadBtn').addEventListener('click', () => {
     if (!chart) {
       alert("No chart to download yet.");
       return;
     }
-    const link = document.createElement('a');
-    link.href = chart.toBase64Image(); // PNG base64
-    link.download = `AQI_chart_${stationSelect.value}_${dateSelect.value}.png`;
-    link.click();
+    try {
+      const link = document.createElement('a');
+      link.href = chart.toBase64Image();
+      link.download = `AQI_chart_${stationSelect.value}_${dateSelect.value}.png`;
+      link.click();
+    } catch (e) {
+      alert("Failed to download chart.");
+      console.error(e);
+    }
   });
 
   document.getElementById('downloadCsvBtn').addEventListener('click', () => {
-  const stationID = stationSelect.value;
-  const selectedDate = dateSelect.value;
+    const stationID = stationSelect.value;
+    const selectedDate = dateSelect.value;
 
-  if (!stationID || !selectedDate) {
-    alert("Please select both station and date first.");
-    return;
-  }
+    if (!stationID || !selectedDate) {
+      alert("Please select both station and date first.");
+      return;
+    }
 
-  fetch(`https://isatuairquality.onrender.com/aqi/stations/${stationID}`)
-    .then(res => res.json())
-    .then(data => {
-      const filtered = data.filter(entry => {
-        const dateOnly = new Date(entry.date_time).toISOString().split('T')[0];
-        return dateOnly === selectedDate;
+    fetch(`https://isatuairquality.onrender.com/aqi/stations/${stationID}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data)) {
+          alert("Unexpected data format.");
+          return;
+        }
+
+        const filtered = data.filter(entry => {
+          const localDate = new Date(entry.date_time).toLocaleDateString('en-CA');
+          return localDate === selectedDate;
+        });
+
+        if (filtered.length === 0) {
+          alert("No AQI data available to download.");
+          return;
+        }
+
+        let csv = "Time,AQI\n";
+        filtered.forEach(entry => {
+          const time = new Date(entry.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          csv += `${time},${entry.aqi}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `AQI_${stationID}_${selectedDate}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+      })
+      .catch(err => {
+        alert("Failed to download CSV.");
+        console.error(err);
       });
+  });
 
-      if (filtered.length === 0) {
-        alert("No AQI data available to download.");
-        return;
-      }
+  // Initial load
+  loadStations();
+</script>
 
-      let csv = "Time,AQI\n";
-      filtered.forEach(entry => {
-        const time = new Date(entry.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        csv += `${time},${entry.aqi}\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `AQI_${stationID}_${selectedDate}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-    });
-});
-
-
-    // Initial load
-    loadStations();
-  </script>
 </body>
 </html>

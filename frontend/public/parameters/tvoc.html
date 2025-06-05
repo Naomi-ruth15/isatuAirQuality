@@ -72,8 +72,8 @@
           <i class="fas fa-wind text-white text-lg"></i>
         </div>
         <div>
-          <h1 class="text-xl font-bold">AirWatch</h1>
-          <p class="text-xs text-white/70">Quality Monitor</p>
+          <h1 class="text-xl font-bold">ISAT U Ambiance</h1>
+          <p class="text-xs text-white/70">Indoor Air Quality Monitoring System</p>
         </div>
       </div>
     </div>
@@ -263,6 +263,13 @@
             <div class="chart-container">
               <canvas id="lineChart"></canvas>
             </div>
+            <div class="mt-4">
+            <button id="downloadBtn" class="bg-blue-700 hover:bg-violet-800 text-white px-4 py-2 rounded">
+              Download Chart
+            </button>
+            <button id="downloadCsvBtn" class="bg-blue-600 hover:bg-violet-700 text-white px-4 py-2 rounded mt-2">
+              Download CSV
+            </button>
           </div>
         </section>
 
@@ -292,7 +299,7 @@
       <footer class="text-center py-8">
         <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
           <p class="text-sm text-gray-600">
-            &copy; 2025 AirWatch Pro. Environmental monitoring made simple.
+            &copy; 2025 ISAT U Ambiance. Indoor Air Quality Index.
           </p>
           <div class="flex justify-center items-center mt-2 space-x-4 text-xs text-gray-500">
             <span>Powered by real-time sensors</span>
@@ -544,6 +551,59 @@
         });
       }
     });
+
+    // Download chart as image
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    if (!lineChartInstance) {
+      alert("No chart to download yet.");
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = lineChartInstance.toBase64Image(); // PNG base64
+    const station = document.getElementById('stationSelect').value;
+    const date = document.getElementById('dateSelect').value;
+    link.download = `TVOC_chart_${station}_${date}.png`;
+
+    link.click();
+  });
+
+  //for downloading in csv
+  document.getElementById('downloadCsvBtn').addEventListener('click', async () => {
+    const stationID = document.getElementById('stationSelect').value;
+    const date = document.getElementById('dateSelect').value;
+
+    if (!stationID || !date) {
+      alert("Please select a station and date first.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://isatuairquality.onrender.com/parameter/tvoc/${stationID}/${date}`);
+      const data = await res.json();
+
+      if (data.length === 0) {
+        alert("No data available to download.");
+        return;
+      }
+
+      let csv = "Time,TVOC (ppb)\n";
+      data.forEach(entry => {
+        const time = new Date(entry.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        csv += `${time},${entry.tvoc}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `TVOC_${stationID}_${date}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to fetch TVOC data for CSV download:", err);
+      alert("Failed to download CSV.");
+    }
+  });
   </script>
 </body>
 </html>
