@@ -3,226 +3,221 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Air Quality Monitoring</title>
+  <title>Document</title>
   <script src="https://cdn.tailwindcss.com"></script>
-<style>
-  * {
-    font-family: "Poppins", sans-serif;
-    text-decoration: none;
-    outline: none;
-  }
-
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 250px;
-    overflow-y: auto;
-  }
-
-  #content {
-    margin-left: 250px;
-    padding: 20px;
-    width: calc(100% - 250px);
-    height: 100vh;
-  }
-
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-
-  .nav-link {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-radius: 5px;
-    transition: background 0.3s, color 0.3s;
-    color: #e0f2ff;
-  }
-
-  .nav-link:hover {
-    background-color: #e0f2ff;
-    color: #1e3a8a;
-  }
-
-  .nav-link.active {
-    background-color: #bfdbfe;
-    color: #1e3a8a;
-    font-weight: bold;
-  }
-
-  .nav-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 12px;
-  }
-
-  .dropdown-item {
-    display: flex;
-    align-items: center;
-    padding: 8px 8px 8px 32px;
-    transition: background 0.3s, color 0.3s;
-  }
-
-  .dropdown-item:hover {
-    background-color: #e0f2ff;
-  }
-
-  .dropdown-icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 10px;
-  }
-</style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * { font-family: "Inter", sans-serif; }
+    .glass { backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }
+    .hover-scale:hover { transform: scale(1.02); transition: transform 0.2s ease-in-out; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea, #764ba2); }
+    @keyframes pulse-gentle { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    .status-online { animation: pulse-gentle 2s infinite; }
+    .sidebar { transition: width 0.3s ease-in-out; }
+    .sidebar.collapsed { width: 4rem; }
+    .sidebar.expanded { width: 16rem; }
+    .nav-text { transition: opacity 0.3s ease-in-out; }
+    .sidebar.collapsed .nav-text { opacity: 0; width: 0; overflow: hidden; }
+    .sidebar.expanded .nav-text { opacity: 1; width: auto; }
+    .dropdown-arrow { transition: opacity 0.3s ease-in-out; }
+    .sidebar.collapsed .dropdown-arrow { opacity: 0; }
+    .main-content { transition: margin-left 0.3s ease-in-out; }
+    .main-content.sidebar-expanded { margin-left: 16rem; }
+    .main-content.sidebar-collapsed { margin-left: 4rem; }
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; z-index: 50; transform: translateX(-100%); width: 16rem !important; }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .main-content { margin-left: 0 !important; }
+    }
+    .tooltip {
+      position: absolute;
+      left: 100%; top: 50%; transform: translateY(-50%);
+      margin-left: 0.5rem; padding: 0.25rem 0.5rem;
+      background: rgba(0, 0, 0, 0.8); color: white;
+      border-radius: 0.25rem; font-size: 0.75rem;
+      white-space: nowrap; opacity: 0; pointer-events: none;
+      transition: opacity 0.2s; z-index: 1000;
+    }
+    .nav-item:hover .tooltip { opacity: 1; }
+    .sidebar.expanded .tooltip { display: none; }
+    iframe { width: 100%; height: 100%; border: none; }
+  </style>
 </head>
+<body class="bg-gray-100 text-gray-800 min-h-screen">
 
-<body class="bg-[#f0f9ff] text-blue-900">
-  <!-- Sidebar -->
-  <div class="w-1/6 bg-[#1e3a8a] h-screen text-center p-4 text-white sidebar">
-    <ul class="space-y-4 text-left">
-      <li>
-        <a href="maindashboard.html" class="nav-link active">
-          <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/grid.svg" class="nav-icon" alt="Dashboard" />
-          Dashboard
-        </a>
-      </li>
-      <li>
-        <a href="home.html" class="flex flex-row ml-2 nav-link">
-          <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/home.svg" class="nav-icon" alt="Home" />
-          Home
-        </a>
-      </li>
-      <li>
-        <div class="relative">
-          <button id="parametersToggle" class="nav-link w-full text-left">
-            <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/sliders.svg" class="nav-icon" alt="Parameters" />
-            Parameters
-          </button>
-          <ul id="parametersDropdown" class="hidden absolute left-0 mt-2 w-full bg-white text-blue-900 rounded shadow-md z-10">
-            <li>
-              <a href="parameters/tvoc.html" class="dropdown-item">
-                <img src="https://cdn.jsdelivr.net/npm/@tabler/icons@2.18.0/icons/molecule.svg" class="dropdown-icon" alt="TVOC" />
-                TVOC
-              </a>
-            </li>
-            <li>
-              <a href="parameters/eco2.html" class="dropdown-item">
-                <img src="https://cdn.jsdelivr.net/npm/@tabler/icons@2.18.0/icons/cloud.svg" class="dropdown-icon" alt="eCO2" />
-                eCO2
-              </a>
-            </li>
-            <li>
-              <a href="parameters/temperature.html" class="dropdown-item">
-                <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/thermometer.svg" class="dropdown-icon" alt="Temperature" />
-                Temperature
-              </a>
-            </li>
-            <li>
-              <a href="parameters/humidity.html" class="dropdown-item">
-                <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/droplet.svg" class="dropdown-icon" alt="Humidity" />
-                Humidity
-              </a>
-            </li>
-            <li>
-              <a href="parameters/dustDensity.html" class="dropdown-item">
-                <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.2.96/svg/air-filter.svg" class="dropdown-icon" alt="Dust Density" />
-                Dust Density
-              </a>
-            </li>
-          </ul>
-        </div>
-      </li>
-      <li>
-        <a href="history.html" class="nav-link">
-          <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/clock.svg" class="nav-icon" alt="History" />
-          History
-        </a>
-      </li>
-      <li>
-        <a href="historicalAQI.html" class="nav-link">
-          <img src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/icons/wind.svg" class="nav-icon" alt="Air Quality" />
-          Air Quality Index
-        </a>
-      </li>
-    </ul>
+<!-- Loading Spinner -->
+<div id="loadingSpinner" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+  <div class="bg-white p-4 rounded-full shadow-lg flex flex-col items-center">
+    <i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i>
+    <span class="mt-2 text-sm font-medium text-gray-700">Loading station data...</span>
+  </div>
+</div>
+
+<!-- Mobile Overlay -->
+<div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed top-0 left-0 h-full bg-gradient-to-b from-blue-800 to-indigo-900 text-white sidebar expanded flex flex-col shadow-xl">
+  <div class="p-4 border-b border-white/20 flex items-center">
+    <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center flex-shrink-0">
+      <i class="fas fa-leaf text-white text-sm"></i>
+    </div>
+    <div class="nav-text ml-3 overflow-hidden">
+      <h1 class="text-lg font-bold">ISAT U Ambiance</h1>
+      <p class="text-xs text-white/70">Indoor Air Quality Monitoring</p>
+    </div>
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebarToggle" class="ml-auto text-white focus:outline-none">
+      <i class="fas fa-bars"></i>
+    </button>
   </div>
 
-  <!-- Content Area -->
-  <div id="content" class="flex-grow p-6">
-    <iframe id="contentFrame" src="maindashboard.html"></iframe>
-  </div>
-</body>
+  <!-- Navigation -->
+  <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+    <div class="nav-item relative">
+      <a href="home.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+        <i class="fas fa-home w-5 h-5 flex-shrink-0"></i>
+        <span class="nav-text ml-3">Home</span>
+        <div class="tooltip">Home</div>
+      </a>
+    </div>
+    <div class="nav-item relative">
+      <a href="maindashboard.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+        <i class="fas fa-th-large w-5 h-5 flex-shrink-0"></i>
+        <span class="nav-text ml-3">Dashboard</span>
+        <div class="tooltip">Dashboard</div>
+      </a>
+    </div>
+    <div class="space-y-1">
+      <div class="nav-item relative">
+        <button id="parametersToggle" class="w-full flex items-center justify-between px-3 py-2 rounded hover:bg-blue-700 text-left">
+          <div class="flex items-center">
+            <i class="fas fa-sliders-h w-5 h-5 flex-shrink-0"></i>
+            <span class="nav-text ml-3">Sensor Data</span>
+          </div>
+          <i id="dropdownArrow" class="fas fa-chevron-down dropdown-arrow nav-text"></i>
+          <div class="tooltip">SEnsor Data</div>
+        </button>
+      </div>
+      <div id="parametersDropdown" class="hidden nav-text ml-4 space-y-1">
+        <a href="parameters/tvoc.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center dropdown-item">
+          <i class="fas fa-vial w-4 h-4 mr-2"></i> TVOC
+        </a>
+        <a href="parameters/eco2.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center dropdown-item">
+          <i class="fas fa-cloud w-4 h-4 mr-2"></i> eCO2
+        </a>
+        <a href="parameters/temperature.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center dropdown-item">
+          <i class="fas fa-thermometer-half w-4 h-4 mr-2"></i> Temperature
+        </a>
+        <a href="parameters/humidity.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center dropdown-item">
+          <i class="fas fa-tint w-4 h-4 mr-2"></i> Humidity
+        </a>
+        <a href="parameters/dustDensity.html" class="block px-3 py-1 text-sm hover:bg-blue-700 rounded flex items-center dropdown-item">
+          <i class="fas fa-smog w-4 h-4 mr-2"></i> Dust Density
+        </a>
+      </div>
+    </div>
+    <div class="nav-item relative">
+      <a href="history.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+        <i class="fas fa-history w-5 h-5 flex-shrink-0"></i>
+        <span class="nav-text ml-3">History</span>
+        <div class="tooltip">History</div>
+      </a>
+    </div>
+    <div class="nav-item relative">
+      <a href="historicalAQI.html" class="flex items-center px-3 py-2 rounded hover:bg-blue-700 text-white nav-link">
+        <i class="fas fa-wind w-5 h-5 flex-shrink-0"></i>
+        <span class="nav-text ml-3">Air Quality Index</span>
+        <div class="tooltip">Air Quality Index</div>
+      </a>
+    </div>
+  </nav>
+</aside>
 
+<!-- Content Area -->
+<div id="mainContent" class="main-content sidebar-expanded ml-64 p-6 h-screen overflow-hidden">
+  <iframe id="contentFrame" src="maindashboard.html" class="w-full h-full border-none rounded-lg shadow-lg"></iframe>
+</div>
 
-  <!-- Script -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const links = document.querySelectorAll(".nav-link");
-      const contentFrame = document.getElementById("contentFrame");
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const links = document.querySelectorAll(".nav-link");
+    const contentFrame = document.getElementById("contentFrame");
+    const parametersToggle = document.getElementById("parametersToggle");
+    const parametersDropdown = document.getElementById("parametersDropdown");
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("mainContent");
+    const overlay = document.getElementById("mobileOverlay");
+    const dropdownArrow = document.getElementById("dropdownArrow");
 
-      const parametersToggle = document.getElementById("parametersToggle");
-      const parametersDropdown = document.getElementById("parametersDropdown");
+    const isMobile = () => window.innerWidth <= 768;
 
-      // Toggle dropdown
-      parametersToggle.addEventListener("click", function (e) {
-        e.preventDefault();
-        parametersDropdown.classList.toggle("hidden");
-      });
-
-      // Handle link clicks
-      document.querySelectorAll("a").forEach(link => {
-        link.addEventListener("click", function (event) {
-          const url = this.getAttribute("href");
-
-          if (url === "home.html") {
-            // Let Home open in full page
-            return;
-          }
-
-          if (url) {
-            event.preventDefault();
-
-            // Update active class
-            links.forEach(l => l.classList.remove("active"));
-            if (this.classList.contains("nav-link")) {
-              this.classList.add("active");
-            }
-
-            // Load iframe
-            contentFrame.src = url;
-
-            // Close dropdown
-            parametersDropdown.classList.add("hidden");
-          }
-        });
-      });
-
-      // Close dropdown on outside click
-      document.addEventListener("click", function(event) {
-        if (!parametersToggle.contains(event.target) && !parametersDropdown.contains(event.target)) {
-          parametersDropdown.classList.add("hidden");
-        }
-      });
-
-      // Icon color logic
-      const applyIconColors = () => {
-        document.querySelectorAll(".nav-icon, .dropdown-icon").forEach(icon => {
-          if (icon.closest(".sidebar") && !icon.closest("#parametersDropdown")) {
-            icon.style.filter = "invert(100%) sepia(0%) saturate(0%) hue-rotate(93deg) brightness(103%) contrast(103%)";
-          }
-          if (icon.closest("#parametersDropdown")) {
-            icon.style.filter = "invert(20%) sepia(13%) saturate(841%) hue-rotate(76deg) brightness(94%) contrast(91%)";
-          }
-        });
-      };
-
-      applyIconColors();
-      const observer = new MutationObserver(applyIconColors);
-      observer.observe(parametersDropdown, { attributes: true });
+    // Toggle Parameters Dropdown
+    parametersToggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      parametersDropdown.classList.toggle("hidden");
+      dropdownArrow.classList.toggle("rotate-180");
     });
-  </script>
+
+    // Toggle Sidebar
+    document.getElementById("sidebarToggle").addEventListener("click", () => {
+      if (isMobile()) {
+        sidebar.classList.toggle("mobile-open");
+        overlay.classList.toggle("hidden");
+      } else {
+        sidebar.classList.toggle("collapsed");
+        sidebar.classList.toggle("expanded");
+        mainContent.classList.toggle("sidebar-collapsed");
+        mainContent.classList.toggle("sidebar-expanded");
+      }
+    });
+
+    // Click outside closes sidebar on mobile
+    overlay.addEventListener("click", () => {
+      if (isMobile()) {
+        sidebar.classList.remove("mobile-open");
+        overlay.classList.add("hidden");
+      }
+    });
+
+   document.querySelectorAll("a[href]").forEach(link => {
+  link.addEventListener("click", (e) => {
+    const url = link.getAttribute("href");
+
+    // Let home.html open normally
+    if (url === "home.html") return;
+
+    // Load in iframe instead of full page redirect
+    e.preventDefault();
+    contentFrame.src = url;
+
+    // Update active state for nav links
+    if (link.classList.contains("nav-link")) {
+      links.forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+    }
+
+    // Close dropdown if link came from there
+    if (link.classList.contains("dropdown-item")) {
+      document.querySelectorAll(".dropdown-item").forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+    }
+  });
+});
+
+
+
+    // Close parameters dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!parametersToggle.contains(e.target) && !parametersDropdown.contains(e.target)) {
+        parametersDropdown.classList.add("hidden");
+      }
+    });
+  });
+</script>
+
 </body>
 </html>

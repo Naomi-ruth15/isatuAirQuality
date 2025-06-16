@@ -5,653 +5,407 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ISAT-U Ambiance</title>
   <link rel="icon" type="image/png" href="images/Air-Quality-Logo.png">
-
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script> 
-  
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
   <style>
     :root {
       --primary-blue: #0066ff; 
       --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-
-    * {
-      font-family: "Inter", sans-serif;
-    }
-
-    .space-grotesk {
-      font-family: "Space Grotesk", sans-serif;
-    }
-
-    /* Smooth scroll behavior */
-    html {
-      scroll-behavior: smooth
-    }
-
-    /* Glassmorphism */
-    .glass {
-      backdrop-filter: blur(10px);
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    /* Fade Animation */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(40px);
-      transition: all 0.8s ease-out;
-    }
-
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Hover Effects */
-    .hover-lift {
-      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .hover-lift:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    /* Hamburger Menu */
-    .slider-nav {
-      display: none;
-    }
-
-    @media (max-width: 768px) {
-      .slider-nav {
-        display: flex;
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 10;
-        background: rgba(255, 255, 255, 0.9);
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      }
-      .slider-nav.prev {
-        left: 10px;
-      }
-      .slider-nav.next {
-        right: 10px;
-      }
-      .slide img {
-        height: 300px !important;
-      }
-    }
-
-    /*Slider */
-    .slider-container {
-      position: relative;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      overflow: hidden;
-      border-radius: 20px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-    }
-
-    .slider-wrapper {
-      display: flex;
-      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      will-change: transform;
-    }
-
-    .slide {
-      min-width: 100%;
-      position: relative;
-    }
-
-    .slide img {
-      width: 100%;
-      height: 500px;
-      object-fit: cover;
-      display: block;
-    }
-
-    .slide-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(0, 0, 0, 0.4), rgba(0, 102, 255, 0.2));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .slide:hover .slide-overlay {
-      opacity: 1;
-    }
-
-    /* Navigation Dots */
-    .nav-dots {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .nav-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.4);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .nav-dot.active {
-      background: var(--primary-blue);
-      transform: scale(1.2);
-    }
-
-    .nav-dot:hover {
-      background: rgba(0, 102, 255, 0.7);
-      transform: scale(1.1);
-    }
-
-    /* Modern button styles */
+    * { font-family: "Inter", sans-serif; }
+    .space-grotesk { font-family: "Space Grotesk", sans-serif; }
+    html { scroll-behavior: smooth }
+    .glass { backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);}
+    .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out;}
+    .fade-in.visible { opacity: 1; transform: translateY(0);}
+    .hover-lift { transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);}
+    .hover-lift:hover { transform: translateY(-6px); box-shadow: 0 10px 20px rgba(0,0,0,0.1);}
     .modern-btn {
       background: linear-gradient(135deg, var(--primary-blue), #004db3);
-      color: white;
-      padding: 14px 32px;
-      border-radius: 50px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0. 3s ease;
-      border: none;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
+      color: white; padding: 14px 32px; border-radius: 50px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease;
+      border: none; cursor: pointer; position: relative; overflow: hidden;
     }
-
     .modern-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
       transition: left 0.5s;
     }
-
-    .modern-btn:hover::before {
-      left: 100%;
-    }
-
-    .modern-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 102, 255, 0.3);
-    }
-
-    /* Hero Title */
+    .modern-btn:hover::before { left: 100%; }
+    .modern-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,102,255,0.3);}
     .hero-title {
-      font-size: clamp(3rem, 8vw, 7rem);
-      font-weight: 900;
-      background: var(--gradient-main);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      color: transparent;
-      line-height: 1.1;
+      font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 900;
+      background: var(--gradient-main); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text; color: transparent; line-height: 1.1;
     }
-
-    /* Floating animation */
-    .floating {
-      animation: float 6s ease-in-out infinite;
+    .floating { animation: float 6s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-20px);} }
+    .side-spin { animation: sideSpin 6s linear infinite; transform-style: preserve-3d; }
+    @keyframes sideSpin { from{transform:rotateY(0deg);} to{transform:rotateY(360deg);} }
+    .bg-gradient-to-br.from-blue-500\/10.to-indigo-800\/10 {
+      background: linear-gradient(to bottom right, rgba(59,130,246,0.1), rgba(79,70,229,0.1));
     }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-
-    /* Gradient Background */
-    .animated-bg {
-      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
-    }
-
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* Responsive Adjustments */
+    .backdrop-blur-sm { backdrop-filter: blur(4px);}
     @media (max-width: 768px) {
-      .slide img {
-        height: 300px;
-      }
+      .grid.grid-cols-3 > div:nth-child(n+4) { display: none; }
+      .slide img { height: 300px !important; }
     }
-    /* Fade-in Animation */
-.fade-in {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s ease-out;
-}
-.fade-in.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Hover Lift Effect */
-.hover-lift:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Glassmorphism Cards */
-.bg-gradient-to-br.from-blue-500\/10.to-indigo-800\/10 {
-  background: linear-gradient(to bottom right, rgba(59, 130, 246, 0.1), rgba(79, 70, 229, 0.1));
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .grid.grid-cols-3 > div:nth-child(n+4) {
-    display: none; /* Show only 3 cards on mobile */
-  }
-}
-
-@keyframes sideSpin {
-  from { transform: rotateY(0deg); }
-  to { transform: rotateY(360deg); }
-}
-
-.side-spin {
-  animation: sideSpin 6s linear infinite;
-  transform-style: preserve-3d;
-  backface-visibility: preserve-3d;
-  -webkit-backface-visibility: var(--primary-blue);
-}
-
-/*Floating Animation */
-.floating {
-  animation: float 6s ease-in-out infinite;
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
-
+    /* Slider */
+    .slider-container { position: relative; width: 100%; max-width: 900px; margin: 0 auto; overflow: hidden; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.2);}
+    .slider-wrapper { display: flex; transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);}
+    .slide { min-width: 100%; position: relative;}
+    .slide img { width: 100%; height: 400px; object-fit: cover; display: block;}
+    .slide-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(45deg,rgba(0,0,0,0.4),rgba(0,102,255,0.2)); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;}
+    .slide:hover .slide-overlay { opacity: 1;}
+    .slider-nav { display: none;}
+    @media (max-width: 768px) {
+      .slider-nav { display: flex; position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; background: rgba(255,255,255,0.9); width: 40px; height: 40px; border-radius: 50%; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1);}
+      .slider-nav.prev { left: 10px;}
+      .slider-nav.next { right: 10px;}
+    }
+    .nav-dots { display: flex; justify-content: center; gap: 12px; margin-top: 20px;}
+    .nav-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.3s;}
+    .nav-dot.active { background: var(--primary-blue); transform: scale(1.2);}
+    .nav-dot:hover { background: rgba(0,102,255,0.7); transform: scale(1.1);}
   </style>
 </head>
-<body class="bg-white text-gray-800 min-h-screen">
+<body class="bg-white text-gray-800 min-h-screen flex flex-col">
   <!-- Header -->
   <header class="sticky top-0 w-full z-50 bg-white shadow-md border-b border-gray-200 glass">
-    <nav class="container mx-auto px-6 py-4">
-      <div class="flex justify-between items-center">
-        <div class="text-2xl font-bold space-grotesk text-blue-600">ISAT U Ambiance: An indoor Air Quality Monitoring System</div>
-
-        <!-- Desktop Nav -->
-        <div class="hidden md:flex space-x-8">
-          <a href="#home" class="font-medium hover:text-blue-600 transition duration-300">Home</a>
-          <a href="maindashboard.html" class="font-medium hover:text-blue-600 transition duration-300">Dashboard</a>
-          <a href = "#team" class="font-medium hover:text-blue-600 transition duration-300">Team</a>
-          <a href="#about" class="font-medium hover:text-blue-600 transition duration-300">About</a>
-          <a href="#parameters" class="font-medium hover:text-blue-600 transition duration-300">Parameters</a>
-          <a href="#framework" class="font-medium hover:text-blue-600 transition duration-300">Framework</a>
-          <a href="#partner" class="font-medium hover:text-blue-600 transition duration-300">Partner SUCs</a>
-        </div>
-
-        <!-- Mobile Hamburger Icon -->
-        <button id="mobileMenuToggle" class="md:hidden text-gray-700">
-          <i class="fas fa-bars text-xl"></i>
-        </button>
+    <nav class="container mx-auto px-6 py-4 flex items-center justify-between">
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-3">
+        <img src="images/Indoor-Air-quality.png" alt="Logo" class="w-12 h-12 rounded-full shadow-lg border-2 border-blue-500 side-spin" />
+        <span class="text-xl font-bold space-grotesk text-blue-700">ISAT U Ambiance</span>
       </div>
-
-      <!-- Mobile Dropdown Navigation -->
-      <div id="mobileNav" class="hidden flex-col md:hidden mt-4 space-y-4 pb-4">
-        <a href="#home" class="block font-medium hover:text-blue-600 transition">Home</a>
-        <a href="maindashboard.html" class="block font-medium hover:text-blue-600 transition">Dashboard</a>
-        <a href = "#team" class="font-medium hover:text-blue-600 transition duration-300">Team</a>
-        <a href="#about" class="block font-medium hover:text-blue-600 transition">About</a>
-        <a href="#parameters" class="block font-medium hover:text-blue-600 transition">Parameters</a>
-        <a href="#framework" class="block font-medium hover:text-blue-600 transition">Framework</a>
-        <a href="#partner" class="font-medium hover:text-blue-600 transition duration-300">Partner SUCs</a>
+      <!-- Desktop Nav -->
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="#home" class="font-medium hover:text-blue-600 transition">Home</a>
+        <a href="dashboard.html" class="font-medium hover:text-blue-600 transition">Dashboard</a>
+        <a href="#about" class="font-medium hover:text-blue-600 transition">About</a>
+        <a href="#parameters" class="font-medium hover:text-blue-600 transition">Parameters</a>
+        <a href="#framework" class="font-medium hover:text-blue-600 transition">Framework</a>
+        <a href="#team" class="font-medium hover:text-blue-600 transition">Team</a>
+        <a href="#partner" class="font-medium hover:text-blue-600 transition">Partners</a>
       </div>
+      <!-- Mobile Menu Button -->
+      <button id="mobileMenuToggle" class="md:hidden text-gray-700 focus:outline-none">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
     </nav>
+    <!-- Mobile Nav -->
+    <div id="mobileNav" class="hidden flex-col md:hidden px-6 pb-4 space-y-2 bg-white shadow">
+      <a href="#home" class="block font-medium hover:text-blue-600 transition">Home</a>
+      <a href="maindashboard.html" class="block font-medium hover:text-blue-600 transition">Dashboard</a>
+      <a href="#about" class="block font-medium hover:text-blue-600 transition">About</a>
+      <a href="#parameters" class="block font-medium hover:text-blue-600 transition">Parameters</a>
+      <a href="#framework" class="block font-medium hover:text-blue-600 transition">Framework</a>
+      <a href="#team" class="block font-medium hover:text-blue-600 transition">Team</a>
+      <a href="#partner" class="block font-medium hover:text-blue-600 transition">Partners</a>
+    </div>
   </header>
 
-  <!-- Hero Section with Netflix-style Slider -->
-  <section id="home" class="min-h-screen flex flex-col justify-center items-center px-6 py-20 relative overflow-hidden">
-    <!-- Animated background elements -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -top-10 -left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating"></div>
-      <div class="absolute top-20 -right-10 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: -2s;"></div>
-      <div class="absolute -bottom-10 left-20 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: -4s;"></div>
-    </div>
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col">
 
-   <!-- Hero Section -->
-<section id="home" class="min-h-screen flex flex-col justify-center items-center px-6 py-20 relative overflow-hidden">
-  <!-- Animated background elements -->
-  <div class="absolute inset-0 overflow-hidden">
-    <div class="absolute -top-10 -left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating"></div>
-    <div class="absolute top-20 -right-10 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: -2s;"></div>
-    <div class="absolute -bottom-10 left-20 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: -4s;"></div>
-  </div>
-
- <!-- Logo Container -->
-<div class="relative z-10 mb-6">
-  <img 
-    src="images/aqilogo.png" 
-    alt="IAQ Monitor Logo" 
-    id="heroLogo" 
-    class="w-64 h-64 mx-auto object-cover rounded-full side-spin shadow-lg"
-  />
-</div>
-  <!-- Text Content -->
-  <div class="relative z-10 text-center mb-12 fade-in">
-    <h1 class="hero-title space-grotesk">ISAT U Ambiance</h1>
-    <p class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
-      An indoor Air Quality Monitoring System
-    </p>
-    <a href="maindashboard.html" class="modern-btn inline-block">
-      Explore Dashboard
-    </a>
-  </div>
-</section>
-
-    <!-- Netflix-style Slider -->
-    <div class="relative z-10 w-full max-w-6xl fade-in">
-      <div class="slider-container">
-        <button class="slider-nav prev" onclick="prevSlide()">
-          <i class="fas fa-chevron-left text-gray-700"></i>
-        </button>
-        <button class="slider-nav next" onclick="nextSlide()">
-          <i class="fas fa-chevron-right text-gray-700"></i>
-        </button>
-        <div class="slider-wrapper" id="sliderWrapper">
-          <div class="slide">
-            <img src="images/sap1.gif" alt="Dashboard Overview" />
-            <div class="slide-overlay">
-              <div class="text-center text-white">
-                <h3 class="text-3xl font-bold mb-2">Real-time Dashboard</h3>
-                <p class="text-lg opacity-90">Monitor all parameters in one comprehensive view</p>
+    <!-- Hero Section -->
+    <section id="home" class="relative flex flex-col md:flex-row items-center justify-between px-6 py-16 md:py-24 bg-gradient-to-br from-blue-500/10 via-purple-600/10 to-indigo-800/10 overflow-hidden">
+      <!-- Animated BG -->
+      <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute -top-10 -left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating"></div>
+        <div class="absolute top-20 -right-10 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: -2s;"></div>
+        <div class="absolute -bottom-10 left-20 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 floating" style="animation-delay: -4s;"></div>
+      </div>
+      <div class="z-10 flex-1 flex flex-col items-center md:items-start text-center md:text-left">
+        <h1 class="hero-title space-grotesk mb-4">ISAT U Ambiance</h1>
+        <p class="text-xl md:text-2xl text-gray-600 mb-8 max-w-lg">An indoor Air Quality Monitoring System</p>
+        <a href="dashboard.html" class="modern-btn inline-block">Explore Dashboard</a>
+      </div>
+      <!-- Right: Slider -->
+      <div class="relative z-10 flex-1 flex justify-center">
+        <div class="slider-container">
+          <button class="slider-nav prev" onclick="prevSlide()">
+            <i class="fas fa-chevron-left text-gray-700"></i>
+          </button>
+          <button class="slider-nav next" onclick="nextSlide()">
+            <i class="fas fa-chevron-right text-gray-700"></i>
+          </button>
+          <div class="slider-wrapper" id="sliderWrapper">
+            <div class="slide">
+              <img src="images/dash.jpg" alt="Dashboard Overview" />
+              <div class="slide-overlay">
+                <div class="text-center text-white">
+                  <h3 class="text-2xl font-bold mb-2">Real-time Dashboard</h3>
+                  <p class="text-lg opacity-90">Monitor all parameters in one comprehensive view</p>
+                </div>
+              </div>
+            </div>
+            <div class="slide">
+              <img src="images/dash2.jpg" alt="About IAQ" />
+              <div class="slide-overlay">
+                <div class="text-center text-white">
+                  <h3 class="text-2xl font-bold mb-2">About Our Mission</h3>
+                  <p class="text-lg opacity-90">Learn how we improve indoor environments.</p>
+                </div>
+              </div>
+            </div>
+            <div class="slide">
+              <img src="images/dash3.jpg" alt="Temperature Control" />
+              <div class="slide-overlay">
+                <div class="text-center text-white">
+                  <h3 class="text-2xl font-bold mb-2">Temperature Control</h3>
+                  <p class="text-lg opacity-90">Maintain optimal comfort levels automatically</p>
+                </div>
+              </div>
+            </div>
+            <div class="slide">
+              <img src="images/dash4.jpg" alt="Humidity Monitoring" />
+              <div class="slide-overlay">
+                <div class="text-center text-white">
+                  <h3 class="text-2xl font-bold mb-2">Humidity Tracking</h3>
+                  <p class="text-lg opacity-90">Prevent mold and ensure optimal air moisture</p>
+                </div>
               </div>
             </div>
           </div>
-          <div class="slide">
-            <img src="images/sap2.png" alt="About IAQ" />
-            <div class="slide-overlay">
-              <div class="text-center text-white">
-                <h3 class="text-3xl font-bold mb-2">About Our Mission</h3>
-                <p class="text-lg opacity-90">Learn how we improve indoor environments.</p>
-              </div>
-            </div>
-          </div>
-          <div class="slide">
-            <img src="images/sa3.jpg" alt="Temperature Control" />
-            <div class="slide-overlay">
-              <div class="text-center text-white">
-                <h3 class="text-3xl font-bold mb-2">Temperature Control</h3>
-                <p class="text-lg opacity-90">Maintain optimal comfort levels automatically</p>
-              </div>
-            </div>
-          </div>
-          <div class="slide">
-            <img src="images/sap4.png" alt="Humidity Monitoring" />
-            <div class="slide-overlay">
-              <div class="text-center text-white">
-                <h3 class="text-3xl font-bold mb-2">Humidity Tracking</h3>
-                <p class="text-lg opacity-90">Prevent mold and ensure optimal air moisture</p>
-              </div>
-            </div>
+          <div class="nav-dots">
+            <div class="nav-dot active" onclick="goToSlide(0)"></div>
+            <div class="nav-dot" onclick="goToSlide(1)"></div>
+            <div class="nav-dot" onclick="goToSlide(2)"></div>
+            <div class="nav-dot" onclick="goToSlide(3)"></div>
           </div>
         </div>
       </div>
-      <div class="nav-dots">
-        <div class="nav-dot active" onclick="goToSlide(0)"></div>
-        <div class="nav-dot" onclick="goToSlide(1)"></div>
-        <div class="nav-dot" onclick="goToSlide(2)"></div>
-        <div class="nav-dot" onclick="goToSlide(3)"></div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- About Section -->
-  <section id="about" class="py-20 px-6">
-    <div class="container mx-auto max-w-6xl">
-      <div class="text-center mb-16 fade-in">
-        <h2 class="text-5xl font-bold space-grotesk text-gray-800 mb-6">About Our Mission</h2>
-        <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto mb-8"></div>
+    <!-- About & Parameters -->
+    <section class="container mx-auto max-w-7xl px-6 py-16 grid md:grid-cols-2 gap-12 items-center">
+      <!-- About -->
+      <div id="about" class="fade-in">
+        <h2 class="text-4xl font-bold space-grotesk text-gray-800 mb-6">About Our Mission</h2>
+        <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-600 mb-8"></div>
+        <p class="text-lg text-gray-600 leading-relaxed mb-6">
+          The ISAT U Ambiance Project develops and deploys indoor air quality (IAQ) monitoring devices in select ISAT University buildings. These devices monitor key ambient parameters: TVOC, eCO2, humidity, temperature, and dust density. A real-time dashboard displays this data, calculating and presenting an Indoor Air Quality Index (IAQI) to reflect the current air quality status. This continuous IAQ assessment aims to provide data-driven insights on how to improve student health and well-being.
+        </p>
+        <img src="images/isatu6.jpg" alt="About IAQ" class="rounded-3xl shadow-2xl hover-lift w-full max-w-md mx-auto md:mx-0" />
       </div>
-      <div class="grid md:grid-cols-2 gap-12 items-center">
-        <div class="fade-in">
-          <img src="images/isatu6.jpg" alt="About IAQ" class="rounded-3xl shadow-2xl hover-lift" />
-        </div>
-        <div class="fade-in space-y-6">
-          <h3 class="text-3xl font-bold space-grotesk text-gray-800">ISAT U Ambiance Project</h3>
-          <p class="text-lg text-gray-600 leading-relaxed">
-           The ISAT U Ambiance Project develops and deploys indoor air quality (IAQ) monitoring devices in select ISAT University buildings. These devices monitor key ambient parameters: Total Volatile Organic Compounds (TVOC), equivalent carbon dioxide (eCO2), humidity, temperature, and dust density. A real-time dashboard displays this data, calculating and presenting an Indoor Air Quality Index (IAQI) to reflect the current air quality status. This continuous IAQ assessment aims to provide data-driven insights on how to improve student health and well-being by identifying and addressing potential environmental concerns within the university's learning spaces. This provides a continuous assessment of the IAQ within the monitored spaces.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Parameters Section -->
-  <section id="parameters" class="py-20 px-6 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-800">
-    <div class="container mx-auto max-w-7xl">
-      <div class="text-center mb-16 fade-in">
-        <h2 class="text-5xl font-bold space-grotesk text-white mb-6">Air Quality Parameters</h2>
-        <p class="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+      <!-- Parameters -->
+      <div id="parameters" class="fade-in">
+        <h2 class="text-4xl font-bold space-grotesk text-blue-700 mb-6">Air Quality Parameters</h2>
+        <p class="text-lg text-gray-700 mb-8">
           We monitor critical environmental factors that impact health, cognitive performance, and indoor comfort.
         </p>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="glass p-4 rounded-2xl text-center hover-lift">
+            <div class="text-4xl mb-2">🌫️</div>
+            <div class="font-bold mb-1">TVOC</div>
+            <div class="text-sm text-gray-600">Gases from paints, cleaning products, and building materials.</div>
+          </div>
+          <div class="glass p-4 rounded-2xl text-center hover-lift">
+            <div class="text-4xl mb-2">🟢</div>
+            <div class="font-bold mb-1">eCO₂</div>
+            <div class="text-sm text-gray-600">Equivalent CO₂ for air freshness and ventilation.</div>
+          </div>
+          <div class="glass p-4 rounded-2xl text-center hover-lift">
+            <div class="text-4xl mb-2">💧</div>
+            <div class="font-bold mb-1">Humidity</div>
+            <div class="text-sm text-gray-600">Tracks moisture in the air.</div>
+          </div>
+          <div class="glass p-4 rounded-2xl text-center hover-lift">
+            <div class="text-4xl mb-2">🌡️</div>
+            <div class="font-bold mb-1">Temperature</div>
+            <div class="text-sm text-gray-600">Affects comfort and health.</div>
+          </div>
+          <div class="glass p-4 rounded-2xl text-center hover-lift col-span-2">
+            <div class="text-4xl mb-2">🌪️</div>
+            <div class="font-bold mb-1">Dust Density</div>
+            <div class="text-sm text-gray-600">Measures airborne particles and pollutants.</div>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <!-- Framework, Monitoring Index & Research Partnership -->
+    <section id="framework" class="px-6 py-16 bg-gradient-to-br from-blue-100/60 via-purple-100/60 to-indigo-100/60"></section>
+      <h2 class="text-3xl font-bold mb-10 text-blue-700 text-center">Framework, Monitoring Index & Research Partnership</h2>
+      <div class="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
+        <div class="bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-800 rounded-xl shadow-lg p-6 flex-1 flex flex-col items-center text-center text-white backdrop-blur-sm">
+          <img src="images/f1.jpg" alt="Framework Diagram" class="w-full h-40 object-cover rounded mb-3 border border-white/20" />
+          <h3 class="text-lg font-semibold mb-2">Framework</h3>
+          <p class="text-white/90 text-sm">A sustainable and adaptive framework based on Indoor Air Quality data, building use, and green building codes.</p>
+        </div>
+        <div class="bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-800 rounded-xl shadow-lg p-6 flex-1 flex flex-col items-center text-center text-white backdrop-blur-sm">
+          <img src="images/humid.jpg" alt="Monitoring Index" class="w-full h-40 object-cover rounded mb-3 border border-white/20" />
+          <h3 class="text-lg font-semibold mb-2">Monitoring Index</h3>
+          <p class="text-white/90 text-sm">The IAQ Monitoring Index integrates real-time sensor data and AI to assess indoor air.</p>
+        </div>
+        <div class="bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-800 rounded-xl shadow-lg p-6 flex-1 flex flex-col items-center text-center text-white backdrop-blur-sm">
+          <img src="images/partnership.png" alt="Research Partnership" class="w-full h-40 object-cover rounded mb-3 border border-white/20" />
+          <h3 class="text-lg font-semibold mb-2">Research Partnership</h3>
+          <p class="text-white/90 text-sm">We consult and coordinate with SUCs to develop monitoring databases and IAQ indexing.</p>
+        </div>
+      </div>
+    </section><!-- Team Section -->
+    <section id="team" class="container mx-auto max-w-7xl px-6 py-20">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Our Team</h2>
+        <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto mb-6 rounded-full"></div>
+        <p class="max-w-2xl mx-auto text-lg text-gray-600 leading-relaxed">
+          Meet the dedicated individuals behind the Indoor Air Quality Monitoring Project.
+        </p>
+      </div>
+      
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="fade-in hover-lift glass p-8 rounded-3xl text-white text-center">
-          <div class="text-6xl mb-6">🌫️</div>
-          <h3 class="text-2xl font-bold space-grotesk mb-4">TVOC</h3>
-          <p class="text-white/80 leading-relaxed">
-            Gases emitted from paints, cleaning products, and building materials that impact air quality and may cause health problems.
-          </p>
+        <div class="group fade-in hover-lift relative overflow-hidden p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10">
+            <div class="w-24 h-24 mx-auto mb-4 relative">
+              <img src="images/Gonzales.png" alt="Dr. Yvette G. Gonzales" class="w-full h-full rounded-full border-3 border-blue-300 object-cover shadow-lg">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/20 to-indigo-500/20 group-hover:scale-110 transition-transform duration-300"></div>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Dr. Yvette G. Gonzales</h3>
+            <p class="text-blue-600 font-semibold text-sm mb-2">Project Leader</p>
+            <p class="text-gray-500 text-sm">Associate Professor V</p>
+          </div>
         </div>
-        <div class="fade-in hover-lift glass p-8 rounded-3xl text-white text-center">
-          <div class="text-6xl mb-6">🟢</div>
-          <h3 class="text-2xl font-bold space-grotesk mb-4">eCO₂</h3>
-          <p class="text-white/80 leading-relaxed">
-            Equivalent CO₂ derived from VOC levels, used to estimate indoor air freshness and ventilation adequacy.
-          </p>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10">
+            <div class="w-24 h-24 mx-auto mb-4 relative">
+              <img src="images/Soriano.png" alt="Dr. Ronald Soriano" class="w-full h-full rounded-full border-3 border-blue-300 object-cover shadow-lg">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/20 to-indigo-500/20 group-hover:scale-110 transition-transform duration-300"></div>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Dr. Ronald Soriano</h3>
+            <p class="text-blue-600 font-semibold text-sm mb-2">Project Staff</p>
+            <p class="text-gray-500 text-sm">Doctor of Industrial Technology</p>
+          </div>
         </div>
-        <div class="fade-in hover-lift glass p-8 rounded-3xl text-white text-center">
-          <div class="text-6xl mb-6">💧</div>
-          <h3 class="text-2xl font-bold space-grotesk mb-4">Humidity</h3>
-          <p class="text-white/80 leading-relaxed">
-            Tracks moisture in the air. Extremes can cause mold growth or respiratory discomfort.
-          </p>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10">
+            <div class="w-24 h-24 mx-auto mb-4 relative">
+              <img src="images/Calasara.png" alt="Engr. Rowena P. Calasara" class="w-full h-full rounded-full border-3 border-blue-300 object-cover shadow-lg">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/20 to-indigo-500/20 group-hover:scale-110 transition-transform duration-300"></div>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Engr. Rowena P. Calasara</h3>
+            <p class="text-blue-600 font-semibold text-sm mb-2">Project Staff</p>
+            <p class="text-gray-500 text-sm">EEE Faculty</p>
+          </div>
         </div>
-        <div class="fade-in hover-lift glass p-8 rounded-3xl text-white text-center">
-          <div class="text-6xl mb-6">🌡️</div>
-          <h3 class="text-2xl font-bold space-grotesk mb-4">Temperature</h3>
-          <p class="text-white/80 leading-relaxed">
-            Affects comfort, cognitive performance, and health. Balanced indoor temps promote wellness.
-          </p>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10">
+            <div class="w-24 h-24 mx-auto mb-4 relative">
+              <img src="images/Porras.png" alt="Mr. Alfredo Porras" class="w-full h-full rounded-full border-3 border-blue-300 object-cover shadow-lg">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/20 to-indigo-500/20 group-hover:scale-110 transition-transform duration-300"></div>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Mr. Alfredo Porras</h3>
+            <p class="text-blue-600 font-semibold text-sm mb-2">Project Staff</p>
+            <p class="text-gray-500 text-sm">Computer Department</p>
+          </div>
         </div>
-        <div class="fade-in hover-lift glass p-8 rounded-3xl text-white text-center">
-          <div class="text-6xl mb-6">🌪️</div>
-          <h3 class="text-2xl font-bold space-grotesk mb-4">Dust Density</h3>
-          <p class="text-white/80 leading-relaxed">
-            Measures airborne particles that may carry allergens or pollutants, impacting breathing and indoor hygiene.
-          </p>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-6 rounded-2xl bg-white/80 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10">
+            <div class="w-24 h-24 mx-auto mb-4 relative">
+              <img src="images/Alguidano.png" alt="Engr. Ramon A. Aguinaldo Jr." class="w-full h-full rounded-full border-3 border-blue-300 object-cover shadow-lg">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/20 to-indigo-500/20 group-hover:scale-110 transition-transform duration-300"></div>
+            </div>
+            <h3 class="font-bold text-lg text-gray-800 mb-1">Engr. Ramon A. Aguinaldo Jr.</h3>
+            <p class="text-blue-600 font-semibold text-sm mb-2">Project Staff</p>
+            <p class="text-gray-500 text-sm">FabLab Project Manager</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Partners Section -->
+    <section id="partner" class="container mx-auto max-w-7xl px-6 py-20 bg-gradient-to-br from-blue-50/50 to-indigo-50/30">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Partner SUCs</h2>
+        <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto mb-6 rounded-full"></div>
+        <p class="max-w-2xl mx-auto text-lg text-gray-600 leading-relaxed">
+          We collaborate with leading State Universities and Colleges (SUCs) in the Philippines.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="group fade-in hover-lift relative overflow-hidden p-8 rounded-2xl bg-white/90 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10 text-center">
+            <div class="w-20 h-20 mx-auto mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 group-hover:scale-110 transition-transform duration-300">
+              <img src="images/u-1.png" alt="BPSU Logo" class="w-full h-full object-contain">
+            </div>
+            <h3 class="font-bold text-base text-gray-800 leading-tight">Bataan Peninsula State University</h3>
+          </div>
+        </div>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-8 rounded-2xl bg-white/90 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10 text-center">
+            <div class="w-20 h-20 mx-auto mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 group-hover:scale-110 transition-transform duration-300">
+              <img src="images/u-2.png" alt="CSU Logo" class="w-full h-full object-contain">
+            </div>
+            <h3 class="font-bold text-base text-gray-800 leading-tight">Caraga State University Philippines</h3>
+          </div>
+        </div>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-8 rounded-2xl bg-white/90 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10 text-center">
+            <div class="w-20 h-20 mx-auto mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 group-hover:scale-110 transition-transform duration-300">
+              <img src="images/u-3.png" alt="ISAT U Logo" class="w-full h-full object-contain">
+            </div>
+            <h3 class="font-bold text-base text-gray-800 leading-tight">Iloilo Science and Technology University</h3>
+          </div>
+        </div>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-8 rounded-2xl bg-white/90 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10 text-center">
+            <div class="w-20 h-20 mx-auto mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 group-hover:scale-110 transition-transform duration-300">
+              <img src="images/u-4.png" alt="PUP Logo" class="w-full h-full object-contain">
+            </div>
+            <h3 class="font-bold text-base text-gray-800 leading-tight">Polytechnic University of the Philippines</h3>
+          </div>
+        </div>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-8 rounded-2xl bg-white/90 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10 text-center">
+            <div class="w-20 h-20 mx-auto mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 group-hover:scale-110 transition-transform duration-300">
+              <img src="images/u-5.png" alt="RTU Logo" class="w-full h-full object-contain">
+            </div>
+            <h3 class="font-bold text-base text-gray-800 leading-tight">Rizal Technological University</h3>
+          </div>
+        </div>
+
+        <div class="group fade-in hover-lift relative overflow-hidden p-8 rounded-2xl bg-white/90 backdrop-blur-sm border border-blue-100 shadow-lg hover:shadow-2xl transition-all duration-500">
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative z-10 text-center">
+            <div class="w-20 h-20 mx-auto mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 group-hover:scale-110 transition-transform duration-300">
+              <img src="images/u-6.png" alt="WMSU Logo" class="w-full h-full object-contain">
+            </div>
+            <h3 class="font-bold text-base text-gray-800 leading-tight">Western Mindanao State University</h3>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
- <!-- Framework, Monitoring Index & Research Partnership -->
-<section id="framework" class="px-6 py-12 bg-white border-t border-blue-200">
-  <h2 class="text-2xl font-bold mb-8 text-blue-700 text-center">Framework, Monitoring Index & Research Partnership</h2>
-  <div class="flex flex-col md:flex-row gap-6">
-    <!-- Framework Card -->
-    <div class="bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-800 rounded-xl shadow-lg p-4 w-full md:w-1/3 flex flex-col items-center text-center text-white backdrop-blur-sm">
-      <img src="images/f1.jpg" alt="Framework Diagram" class="w-full h-48 object-cover rounded mb-3 border border-white/20" />
-      <h3 class="text-lg font-semibold mb-2">Framework</h3>
-      <p class="text-white/90 text-sm leading-relaxed">
-        We aim to develop a sustainable and adaptive framework based on IAQ data, building use, and green building codes. This guides optimal design and retrofitting for air quality and well-being.
-      </p>
-    </div>
-
-    <!-- Monitoring Index Card -->
-    <div class="bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-800 rounded-xl shadow-lg p-4 w-full md:w-1/3 flex flex-col items-center text-center text-white backdrop-blur-sm">
-      <img src="images/monitor.png" alt="Monitoring Index" class="w-full h-48 object-cover rounded mb-3 border border-white/20" />
-      <h3 class="text-lg font-semibold mb-2">Monitoring Index</h3>
-      <p class="text-white/90 text-sm leading-relaxed">
-        The IAQ Monitoring Index integrates real-time sensor data and AI to assess indoor air. User feedback enhances accuracy and informs immediate actions.
-      </p>
-    </div>
-
-    <!-- Research Partnership Card -->
-    <div class="bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-800 rounded-xl shadow-lg p-4 w-full md:w-1/3 flex flex-col items-center text-center text-white backdrop-blur-sm">
-      <img src="images/m2.jpg" alt="Research Partnership" class="w-full h-48 object-cover rounded mb-3 border border-white/20" />
-      <h3 class="text-lg font-semibold mb-2">Research Partnership</h3>
-      <p class="text-white/90 text-sm leading-relaxed">
-        We consult and coordinate with SUCs to develop monitoring databases and IAQ indexing, aligning with UNSD goals for sustainability.
-      </p>
-    </div>
-  </div>
-</section>
-
-  <!-- Team Section -->
-<section id="team" class="px-6 py-12 bg-white border-t border-gray-200">
-  <h2 class="text-2xl font-bold mb-6 text-center text-blue-700">Our Team</h2>
-  <p class="max-w-3xl mx-auto text-center mb-10 text-base text-gray-600">
-    Meet the dedicated individuals behind the Indoor Air Quality Monitoring Project — our team of engineers, researchers, and project leaders committed to building a healthier indoor environment.
-  </p>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-    <!-- Team Member 1 -->
-    <div class="fade-in hover-lift p-6 rounded-xl shadow-lg text-center bg-gradient-to-br from-blue-500/10 to-indigo-800/10 backdrop-blur-sm border border-blue-200 hover:border-blue-400 transition-all duration-300">
-      <img src="images/Gonzales.png" alt="Dr. Yvette G. Gonzales" class="w-32 h-32 mx-auto mb-4 rounded-full border-2 border-blue-400 object-cover">
-      <h3 class="text-lg font-semibold text-gray-800">Dr. Yvette G. Gonzales</h3>
-      <p class="text-blue-600 text-sm mb-2">Project Leader</p>
-      <p class="text-xs text-gray-500">Associate Professor V<br>Doctor of Computer and Information Communication Engineering</p>
-    </div>
-
-    <!-- Team Member 2 -->
-    <div class="fade-in hover-lift p-6 rounded-xl shadow-lg text-center bg-gradient-to-br from-blue-500/10 to-indigo-800/10 backdrop-blur-sm border border-blue-200 hover:border-blue-400 transition-all duration-300">
-      <img src="images/Soriano.png" alt="Dr. Ronald Soriano" class="w-32 h-32 mx-auto mb-4 rounded-full border-2 border-blue-400 object-cover">
-      <h3 class="text-lg font-semibold text-gray-800">Dr. Ronald Soriano</h3>
-      <p class="text-blue-600 text-sm mb-2">Project Staff</p>
-      <p class="text-xs text-gray-500">Doctor of Industrial Technology<br>Faculty Member, Computer Department</p>
-    </div>
-
-    <!-- Team Member 3 -->
-    <div class="fade-in hover-lift p-6 rounded-xl shadow-lg text-center bg-gradient-to-br from-blue-500/10 to-indigo-800/10 backdrop-blur-sm border border-blue-200 hover:border-blue-400 transition-all duration-300">
-      <img src="images/Calasara.png" alt="Engr. Rowena P. Calasara" class="w-32 h-32 mx-auto mb-4 rounded-full border-2 border-blue-400 object-cover">
-      <h3 class="text-lg font-semibold text-gray-800">Engr. Rowena P. Calasara</h3>
-      <p class="text-blue-600 text-sm mb-2">Project Staff</p>
-      <p class="text-xs text-gray-500">Faculty Member, Electrical and Electronics Engineering</p>
-    </div>
-
-    <!-- Team Member 4 -->
-    <div class="fade-in hover-lift p-6 rounded-xl shadow-lg text-center bg-gradient-to-br from-blue-500/10 to-indigo-800/10 backdrop-blur-sm border border-blue-200 hover:border-blue-400 transition-all duration-300">
-      <img src="images/Porras.png" alt="Mr. Alfredo Porras" class="w-32 h-32 mx-auto mb-4 rounded-full border-2 border-blue-400 object-cover">
-      <h3 class="text-lg font-semibold text-gray-800">Mr. Alfredo Porras</h3>
-      <p class="text-blue-600 text-sm mb-2">Project Staff</p>
-      <p class="text-xs text-gray-500">Computer Department</p>
-    </div>
-
-    <!-- Team Member 5 -->
-    <div class="fade-in hover-lift p-6 rounded-xl shadow-lg text-center bg-gradient-to-br from-blue-500/10 to-indigo-800/10 backdrop-blur-sm border border-blue-200 hover:border-blue-400 transition-all duration-300">
-      <img src="images/Alguidano.png" alt="Engr. Ramon A. Aguinaldo Jr." class="w-32 h-32 mx-auto mb-4 rounded-full border-2 border-blue-400 object-cover">
-      <h3 class="text-lg font-semibold text-gray-800">Engr. Ramon A. Aguinaldo Jr.</h3>
-      <p class="text-blue-600 text-sm mb-2">Project Staff</p>
-      <p class="text-xs text-gray-500">Faculty, Electronics Engineering Department<br>Project Manager, FabLaB</p>
-    </div>
-
-    <!-- Team Member 6 -->
-    <div class="fade-in hover-lift p-6 rounded-xl shadow-lg text-center bg-gradient-to-br from-blue-500/10 to-indigo-800/10 backdrop-blur-sm border border-blue-200 hover:border-blue-400 transition-all duration-300">
-      <img src="images/Malunda.png" alt="Engr. Santos James Emmanuel C. Malunda" class="w-32 h-32 mx-auto mb-4 rounded-full border-2 border-blue-400 object-cover">
-      <h3 class="text-lg font-semibold text-gray-800">Engr. Santos James Emmanuel C. Malunda</h3>
-      <p class="text-blue-600 text-sm mb-2">Project Staff</p>
-      <p class="text-xs text-gray-500">Robotics Research<br>Cluster Coordinator</p>
-    </div>
-  </div>
-</section>
-
-<!-- Partner SUC Section -->
-<section id="partner" class="px-6 py-12 bg-white border-t border-gray-200">
-  <h2 class="text-2xl font-bold mb-6 text-center text-blue-700">Partner SUCs</h2>
-  <p class="max-w-3xl mx-auto text-center mb-10 text-base text-gray-600">
-    We collaborate with leading State Universities and Colleges (SUCs) in the Philippines to enhance the monitoring and improvement of indoor air quality through shared research, data, and innovations.
-  </p>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-    <!-- Partner Card -->
-    <div class="fade-in hover-lift p-4 rounded-xl text-center border border-blue-200 hover:border-blue-400 shadow-md hover:shadow-blue-200/50 transition-all duration-300 bg-gradient-to-tr from-blue-500/5 to-indigo-800/5 backdrop-blur-sm">
-      <img src="images/u-1.png" alt="ISAT U Logo" class="mx-auto mb-4 max-h-32 object-contain w-full">
-      <h3 class="text-lg font-semibold text-gray-800">Bataan Peninsula State University</h3>
-      <p class="text-gray-500 text-sm mt-2">Collaborating for better indoor air standards.</p>
-    </div>
-
-    <!-- Partner Card -->
-    <div class="fade-in hover-lift p-4 rounded-xl text-center border border-blue-200 hover:border-blue-400 shadow-md hover:shadow-blue-200/50 transition-all duration-300 bg-gradient-to-tr from-blue-500/5 to-indigo-800/5 backdrop-blur-sm">
-      <img src="images/u-2.png" alt="WVSU Logo" class="mx-auto mb-4 max-h-32 object-contain w-full">
-      <h3 class="text-lg font-semibold text-gray-800">Caraga State University Philippines</h3>
-      <p class="text-gray-500 text-sm mt-2">Sharing knowledge and expertise for improved monitoring.</p>
-    </div>
-
-    <!-- Partner Card -->
-    <div class="fade-in hover-lift p-4 rounded-xl text-center border border-blue-200 hover:border-blue-400 shadow-md hover:shadow-blue-200/50 transition-all duration-300 bg-gradient-to-tr from-blue-500/5 to-indigo-800/5 backdrop-blur-sm">
-      <img src="images/u-3.png" alt="CPU Logo" class="mx-auto mb-4 max-h-32 object-contain w-full">
-      <h3 class="text-lg font-semibold text-gray-800">Iloilo Science and Technology University</h3>
-      <p class="text-gray-500 text-sm mt-2">Supporting environmental initiatives through joint research.</p>
-    </div>
-
-    <!-- Partner Card -->
-    <div class="fade-in hover-lift p-4 rounded-xl text-center border border-blue-200 hover:border-blue-400 shadow-md hover:shadow-blue-200/50 transition-all duration-300 bg-gradient-to-tr from-blue-500/5 to-indigo-800/5 backdrop-blur-sm">
-      <img src="images/u-4.png" alt="Polytechnic University" class="mx-auto mb-4 max-h-32 object-contain w-full">
-      <h3 class="text-lg font-semibold text-gray-800">Polytechnic University of the Philippines</h3>
-      <p class="text-gray-500 text-sm mt-2">Promoting innovation in air quality monitoring.</p>
-    </div>
-
-    <!-- Partner Card -->
-    <div class="fade-in hover-lift p-4 rounded-xl text-center border border-blue-200 hover:border-blue-400 shadow-md hover:shadow-blue-200/50 transition-all duration-300 bg-gradient-to-tr from-blue-500/5 to-indigo-800/5 backdrop-blur-sm">
-      <img src="images/u-5.png" alt="Rizal Technological University" class="mx-auto mb-4 max-h-32 object-contain w-full">
-      <h3 class="text-lg font-semibold text-gray-800">Rizal Technological University</h3>
-      <p class="text-gray-500 text-sm mt-2">Working together for a cleaner, healthier future.</p>
-    </div>
-
-    <!-- Partner Card -->
-    <div class="fade-in hover-lift p-4 rounded-xl text-center border border-blue-200 hover:border-blue-400 shadow-md hover:shadow-blue-200/50 transition-all duration-300 bg-gradient-to-tr from-blue-500/5 to-indigo-800/5 backdrop-blur-sm">
-      <img src="images/u-6.png" alt="Western Mindanao State University" class="mx-auto mb-4 max-h-32 object-contain w-full">
-      <h3 class="text-lg font-semibold text-gray-800">Western Mindanao State University</h3>
-      <p class="text-gray-500 text-sm mt-2">Partners in research and development of IAQ solutions.</p>
-    </div>
-  </div>
-</section>
+  </main>
 
   <!-- Footer -->
   <footer class="bg-gray-900 text-white py-12 px-6">
     <div class="container mx-auto max-w-6xl">
       <div class="grid md:grid-cols-3 gap-8 mb-8">
         <div>
-          <h3 class="text-2xl font-bold space-grotesk mb-4">ISAT U Ambiance: An indoor Air Quality Monitoring System</h3>
+          <h3 class="text-2xl font-bold space-grotesk mb-4">ISAT U Ambiance</h3>
           <p class="text-gray-400 leading-relaxed">
             Advancing indoor air quality through innovative monitoring solutions and sustainable practices.
           </p>
@@ -659,7 +413,7 @@
         <div>
           <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
           <div class="space-y-2">
-            <a href="#home" class="block text-gray-400 hover:text-white transition">Home</a> 
+            <a href="#home" class="block text-gray-400 hover:text-white transition">Home</a>
             <a href="maindashboard.html" class="block text-gray-400 hover:text-white transition">Dashboard</a>
             <a href="#about" class="block text-gray-400 hover:text-white transition">About</a>
             <a href="#parameters" class="block text-gray-400 hover:text-white transition">Parameters</a>
@@ -713,21 +467,15 @@
       updateSlider();
     }
 
-    // Auto-play slider
     setInterval(nextSlide, 5000);
 
-    // Toggle mobile navigation
     document.getElementById("mobileMenuToggle").addEventListener("click", () => {
       const nav = document.getElementById("mobileNav");
       nav.classList.toggle("hidden");
     });
 
     // Scroll Animations
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: "0px 0px -50px 0px"
-    };
-
+    const observerOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -735,7 +483,6 @@
         }
       });
     }, observerOptions);
-
     document.querySelectorAll(".fade-in").forEach(el => {
       observer.observe(el);
     });

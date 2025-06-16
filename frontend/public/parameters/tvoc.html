@@ -34,12 +34,7 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
     }
-    .status-online {
-      animation: pulse-gentle 2s infinite;
-    }
-    .sidebar-transition {
-      transition: transform 0.3s ease-in-out;
-    }
+    
     .chart-container {
       position: relative;
       height: 300px;
@@ -64,88 +59,8 @@
   <!-- Mobile Menu Backdrop -->
   <div id="mobileBackdrop" class="fixed inset-0 bg-black/30 z-30 hidden md:hidden"></div>
 
-  <!-- Sidebar -->
-  <aside id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-gradient-to-b from-blue-800 via-blue-900 to-indigo-900 text-white z-40 shadow-2xl sidebar-transition transform -translate-x-full md:translate-x-0 flex flex-col">
-    <div class="p-6 border-b border-white/20">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
-          <i class="fas fa-wind text-white text-lg"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold">ISAT U Ambiance</h1>
-          <p class="text-xs text-white/70">Indoor Air Quality Monitoring System</p>
-        </div>
-      </div>
-    </div>
-    
-    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-      <a href="../maindashboard.html" class="group flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors duration-200">
-        <i class="fas fa-th-large w-5 h-5 mr-3 text-white/80 group-hover:text-white"></i>
-        <span class="font-medium">Dashboard</span>
-      </a>
-      
-      <a href="../home.html" class="group flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors duration-200">
-        <i class="fas fa-home w-5 h-5 mr-3 text-white/80 group-hover:text-white"></i>
-        <span class="font-medium">Home</span>
-      </a>
-      
-      <!-- Parameters Dropdown -->
-      <div class="space-y-1">
-        <button id="parametersToggle" class="w-full group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/10 transition-colors duration-200">
-          <div class="flex items-center">
-            <i class="fas fa-sliders-h w-5 h-5 mr-3 text-white/80 group-hover:text-white"></i>
-            <span class="font-medium">Parameters</span>
-          </div>
-          <i id="dropdownArrow" class="fas fa-chevron-down text-sm transition-transform duration-200"></i>
-        </button>
-        
-        <div id="parametersDropdown" class="hidden ml-6 space-y-1 mt-2">
-          <a href="./tvoc.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200 bg-white/5">
-            <i class="fas fa-flask w-4 h-4 mr-3 text-blue-300"></i>
-            <span>TVOC</span>
-          </a>
-          <a href="./eco2.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
-            <i class="fas fa-cloud w-4 h-4 mr-3 text-white/70"></i>
-            <span>eCO2</span>
-          </a>
-          <a href="./temperature.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
-            <i class="fas fa-thermometer-half w-4 h-4 mr-3 text-white/70"></i>
-            <span>Temperature</span>
-          </a>
-          <a href="./humidity.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
-            <i class="fas fa-tint w-4 h-4 mr-3 text-white/70"></i>
-            <span>Humidity</span>
-          </a>
-          <a href="./dustDensity.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
-            <i class="fas fa-smog w-4 h-4 mr-3 text-white/70"></i>
-            <span>Dust Density</span>
-          </a>
-        </div>
-      </div>
-      
-      <a href="../history.html" class="group flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors duration-200">
-        <i class="fas fa-history w-5 h-5 mr-3 text-white/80 group-hover:text-white"></i>
-        <span class="font-medium">History</span>
-      </a>
-
-      <a href="../historicalAQI.html" class="group flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors duration-200">
-        <i class="fas fa-wind w-5 h-5 mr-3 text-white/80 group-hover:text-white"></i>
-        <span class="font-medium">Air Quality Index</span>
-      </a>
-      
-    </nav>
-    
-    <!-- Sidebar Footer -->
-    <div class="p-4 border-t border-white/20">
-      <div class="flex items-center space-x-2 text-xs text-white/60">
-        <div class="w-2 h-2 bg-green-400 rounded-full status-online"></div>
-        <span>System Online</span>
-      </div>
-    </div>
-  </aside>
-
   <!-- Main Content -->
-  <main class="md:ml-72 min-h-screen">
+  <main class="mmain-content sidebar-expanded overflow-x-hidden max-w-full">
     <!-- Header -->
     <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-lg shadow-sm border-b border-white/20">
       <div class="px-6 py-4">
@@ -522,35 +437,6 @@
     // Initialize
     populateStations();
 
-    // Sidebar Toggle & Dropdown
-    document.addEventListener("DOMContentLoaded", function () {
-      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-      const sidebar = document.getElementById('sidebar');
-      const mobileBackdrop = document.getElementById('mobileBackdrop');
-
-      if (mobileMenuToggle && sidebar) {
-        mobileMenuToggle.addEventListener('click', function () {
-          sidebar.classList.toggle('-translate-x-full');
-          mobileBackdrop.classList.toggle('hidden');
-        });
-        
-        mobileBackdrop.addEventListener('click', function () {
-          sidebar.classList.add('-translate-x-full');
-          mobileBackdrop.classList.add('hidden');
-        });
-      }
-
-      const parametersToggle = document.getElementById('parametersToggle');
-      const parametersDropdown = document.getElementById('parametersDropdown');
-      const dropdownArrow = document.getElementById('dropdownArrow');
-
-      if (parametersToggle && parametersDropdown) {
-        parametersToggle.addEventListener('click', function () {
-          parametersDropdown.classList.toggle('hidden');
-          dropdownArrow.classList.toggle('rotate-180');
-        });
-      }
-    });
 
     // Download chart as image
   document.getElementById('downloadBtn').addEventListener('click', () => {

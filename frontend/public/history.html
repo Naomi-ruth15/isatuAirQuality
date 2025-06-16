@@ -107,85 +107,6 @@
     </div>
   </div>
 
-  <!-- Sidebar -->
-  <aside id="sidebar"
-    class="fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-blue-800 to-indigo-900 text-white z-40 flex flex-col shadow-2xl">
-    
-    <!-- Sidebar Header -->
-    <div class="p-4 border-b border-white/20 flex items-center justify-between">
-      <div class="flex items-center">
-        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-          <i class="fas fa-wind text-white"></i>
-        </div>
-        <div class="nav-text">
-          <h1 class="text-xl font-bold">ISAT U Ambiance</h1>
-          <p class="text-xs text-white/70">Indoor Air Quality Monitoring System</p>
-        </div>
-      </div>
-      <button id="sidebarCollapseBtn" class="hidden md:block p-1 hover:bg-white/10 rounded">
-        <i class="fas fa-angle-left"></i>
-      </button>
-    </div>
-    
-    <!-- Navigation -->
-    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-      <a href="../maindashboard.html" class="block px-3 py-2 rounded-lg hover:bg-blue-700/50 text-white nav-link flex items-center group">
-        <i class="fas fa-th-large w-5 h-5 mr-3 text-center"></i>
-        <span class="nav-text">Dashboard</span>
-      </a>
-      
-      <a href="./home.html" class="block px-3 py-2 rounded-lg hover:bg-blue-700/50 text-white nav-link flex items-center group">
-        <i class="fas fa-home w-5 h-5 mr-3 text-center"></i>
-        <span class="nav-text">Home</span>
-      </a>
-
-      <!-- Parameters Dropdown -->
-      <div class="space-y-1">
-        <button id="parametersToggle" class="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-700/50 flex justify-between items-center group">
-          <span class="flex items-center">
-            <i class="fas fa-sliders-h w-5 h-5 mr-3 text-center"></i>
-            <span class="nav-text">Parameters</span>
-          </span>
-          <i id="dropdownArrow" class="fas fa-chevron-down dropdown-arrow nav-text transition-transform"></i>
-        </button>
-        
-       <div id="parametersDropdown" class="hidden ml-6 space-y-1 mt-2">
-          <a href="parameters/tvoc.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200 bg-white/5">
-            <i class="fas fa-flask w-4 h-4 mr-3 text-blue-300"></i>
-            <span>TVOC</span>
-          </a>
-          <a href="parameters/eco2.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
-            <i class="fas fa-cloud w-4 h-4 mr-3 text-white/70"></i>
-            <span>eCO2</span>
-          </a>
-          <a href="parameters/temperature.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
-            <i class="fas fa-thermometer-half w-4 h-4 mr-3 text-white/70"></i>
-            <span>Temperature</span>
-          </a>
-          <a href="parameters/humidity.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
-            <i class="fas fa-tint w-4 h-4 mr-3 text-white/70"></i>
-            <span>Humidity</span>
-          </a>
-          <a href="parameters/dustDensity.html" class="group flex items-center px-4 py-2 text-sm rounded-lg hover:bg-white/10 transition-colors duration-200">
-            <i class="fas fa-smog w-4 h-4 mr-3 text-white/70"></i>
-            <span>Dust Density</span>
-          </a>
-        </div>
-      </div>
-
-      <a href="history.html" class="block px-3 py-2 rounded-lg bg-blue-700/70 text-white nav-link flex items-center">
-        <i class="fas fa-clock w-5 h-5 mr-3 text-center"></i>
-        <span class="nav-text">History</span>
-      </a>
-
-      <a href="./historicalAQI.html" class="group flex items-center px-4 py-3 rounded-xl hover:bg-white/10 transition-colors duration-200">
-        <i class="fas fa-wind w-5 h-5 mr-3 text-white/80 group-hover:text-white"></i>
-        <span class="font-medium">Air Quality Index</span>
-      </a>
-    </nav>
-
-    
-  </aside>
 
   <!-- Mobile Menu Overlay -->
   <div id="mobileOverlay" class="md:hidden fixed inset-0 bg-black/50 z-30 hidden"></div>
@@ -197,7 +118,7 @@
   </button>
 
   <!-- Main Content -->
-  <main id="mainContent" class="main-content min-h-screen">
+  <main id="mainContent" class="mmain-content sidebar-expanded overflow-x-hidden max-w-full">
     <div class="p-6">
       <!-- Header -->
       <header class="bg-white/90 backdrop-blur-md shadow-lg rounded-2xl p-6 mb-8 border border-white/20">
@@ -624,8 +545,7 @@
         });
       }
 
-      // Parameters dropdown toggle
-      if (parametersToggle && parametersDropdown && dropdownArrow) {
+      if (parametersToggle && parametersDropdown) {
         parametersToggle.addEventListener('click', function () {
           parametersDropdown.classList.toggle('hidden');
           dropdownArrow.classList.toggle('rotate-180');
